@@ -14,5 +14,5 @@ Shell Type: "lunch full_smba1002-userdebug"
 
 Wait for it to get done.
 
-Then type: "time make -j16" (replace 16 with whatever your machine can handle.)
+Then type: "time make otapackage -j16" (replace 16 with whatever your machine can handle.)
 
