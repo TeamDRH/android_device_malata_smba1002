@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-DEVICE=smba1002
+DEVICE=smb_a1002
 MANUFACTURER=malata
 
 mkdir -p ../../../vendor/$MANUFACTURER/$DEVICE
