@@ -12,5 +12,6 @@
 
 # Configuration of smba1002
 dev_mount sdcard /mnt/sdcard auto /devices/platform/sdhci-tegra.3/mmc_host/mmc1
-dev_mount sdcard1 /mnt/sdcard1 auto /devices/platform/sdhci-tegra.2/mmc_host/mmc2
-dev_mount usbdisk /mnt/usbdisk auto /devices/platform/tegra-ehci.2/usb1/1-1/1-1:1.0
+dev_mount sdcard_ext /mnt/sdcard_ext auto /devices/platform/sdhci-tegra.2/mmc_host/mmc2
+dev_mount external1 /mnt/external1 auto /devices/platform/tegra-ehci.2/usb1/1-1/1-1.1/1-1.1:1.0
+dev_mount external2 /mnt/external2 auto /devices/platform/tegra-ehci.2/usb1/1-1/1-1.2/1-1.2:1.0
