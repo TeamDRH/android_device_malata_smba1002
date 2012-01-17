@@ -23,7 +23,7 @@ BOARD_USES_AUDIO_LEGACY := false
 TARGET_USES_OLD_LIBSENSORS_HAL := false
 
 # Use the non-open-source parts, if they're present
--include vendor/malata/smb_a1002/BoardConfigVendor.mk
+-include vendor/malata/smba1002/BoardConfigVendor.mk
 
 #TARGET_NO_RECOVERY := true
 TARGET_NO_BOOTLOADER := true
@@ -48,8 +48,8 @@ BOARD_PAGE_SIZE := 0x00000800
 TARGET_NO_RADIOIMAGE := true
 TARGET_BOARD_PLATFORM := tegra
 TARGET_BOOTLOADER_BOARD_NAME := harmony
-#TARGET_BOARD_INFO_FILE := device/malata/smb_a1002/board-info.txt
-BOARD_EGL_CFG := device/malata/smb_a1002/files/egl.cfg
+#TARGET_BOARD_INFO_FILE := device/malata/smba1002/board-info.txt
+BOARD_EGL_CFG := device/malata/smba1002/files/egl.cfg
 
 BOARD_USES_OVERLAY := true
 USE_OPENGL_RENDERER := true
@@ -59,7 +59,7 @@ BOARD_SYSTEMIMAGE_PARTITION_SIZE := 0x0c800000
 BOARD_USERDATAIMAGE_PARTITION_SIZE := 0x105c0000
 BOARD_FLASH_BLOCK_SIZE := 131072
 
-TARGET_PREBUILT_KERNEL := device/malata/smb_a1002/kernel
+TARGET_PREBUILT_KERNEL := device/malata/smba1002/kernel
 
 # Wifi related defines
 WPA_SUPPLICANT_VERSION := VER_0_8_X

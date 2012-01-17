@@ -13,7 +13,7 @@
 # limitations under the License.
 
 # Inherit from smba1002 device
-$(call inherit-product, device/malata/smb_a1002/full_smba1002.mk)
+$(call inherit-product, device/malata/smba1002/full_smba1002.mk)
 # Inherit from DEADCREME vendor
 $(call inherit-product-if-exists, vendor/deadcreme/deadcreme.mk)
 
@@ -22,7 +22,7 @@ PRODUCT_PACKAGES += \
     Superuser \
     su
 
-PRODUCT_NAME := mdl_smb_a1002
-PRODUCT_DEVICE := smb_a1002
+PRODUCT_NAME := mdl_smba1002
+PRODUCT_DEVICE := smba1002
 PRODUCT_BRAND := Malata
 PRODUCT_MODEL := DEADCREME_kang

@@ -1,6 +1,6 @@
 Here's my smba1002 kanged from the adam device tree for android 4.0.3 ASOP.
 
-Copy to android/device/malata/smb_a1002/
+Copy to android/device/malata/smba1002/
 
 run extract-files.sh or copy-files.sh that'll create your vendor directory
 
