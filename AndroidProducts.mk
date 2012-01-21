@@ -14,5 +14,6 @@
 # limitations under the License.
 #
 PRODUCT_MAKEFILES := \
+    $(LOCAL_DIR)/TeamDRH.mk \
     $(LOCAL_DIR)/full_smba1002.mk \
     $(LOCAL_DIR)/mdl_smba1002.mk
