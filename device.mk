@@ -20,7 +20,7 @@
 # Everything in this directory will become public
 
 ifeq ($(TARGET_PREBUILT_KERNEL),)
-LOCAL_KERNEL := device/malata/smba1002/kernel
+LOCAL_KERNEL := device/malata/smba1002/prebuilt/kernel
 else
 LOCAL_KERNEL := $(TARGET_PREBUILT_KERNEL)
 endif
@@ -40,10 +40,10 @@ PRODUCT_COPY_FILES := \
     device/malata/smba1002/files/ueventd.harmony.rc:root/ueventd.harmony.rc \
     device/malata/smba1002/files/nvram.txt:system/etc/wifi/nvram.txt
 
-# Modules
-PRODUCT_COPY_FILES += \
-    device/malata/smba1002/modules/scsi_wait_scan.ko:system/lib/modules/scsi_wait_scan.ko \
-    device/malata/smba1002/modules/bcm4329.ko:system/lib/modules/bcm4329.ko
+# Modules (moved to smba1002-modules.mk)
+## PRODUCT_COPY_FILES += \
+##     device/malata/smba1002/modules/scsi_wait_scan.ko:system/lib/modules/scsi_wait_scan.ko \
+##     device/malata/smba1002/modules/bcm4329.ko:system/lib/modules/bcm4329.ko
 
 # Bluetooth
 PRODUCT_COPY_FILES += \
@@ -137,6 +137,9 @@ ifneq ($(TARGET_BUILD_VARIANT),user)
 endif
 
 $(call inherit-product, frameworks/base/build/tablet-dalvik-heap.mk)
+
+# Install smba1002 kernel modules from prebuilt
+$(call inherit-product, device/malata/smba1002/smba1002-modules.mk)
 
 # Make it optional to include vendor stuff..Just to be nice ;)
 ifneq ($(TARGET_IGNORE_VENDOR),yes)
