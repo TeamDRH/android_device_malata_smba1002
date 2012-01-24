@@ -1,0 +1,8 @@
+# Aliases for symbols, used by symbol_request().
+alias symbol:vb2_get_contig_userptr videobuf2_memops
+alias symbol:vb2_put_vma videobuf2_memops
+alias symbol:vb2_mmap_pfn_range videobuf2_memops
+alias symbol:bcmsdh_remove bcm4329
+alias symbol:bcmsdh_probe bcm4329
+alias symbol:vb2_common_vm_ops videobuf2_memops
+alias symbol:vb2_vmalloc_memops videobuf2_vmalloc
