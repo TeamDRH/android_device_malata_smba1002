@@ -37,6 +37,7 @@ PRODUCT_LOCALES += mdpi
 PRODUCT_COPY_FILES := \
     $(LOCAL_KERNEL):kernel \
     device/malata/smba1002/files/init.harmony.rc:root/init.harmony.rc \
+    device/malata/smba1002/files/init.harmony.usb.rc:root/init.harmony.usb.rc \
     device/malata/smba1002/files/ueventd.harmony.rc:root/ueventd.harmony.rc \
     device/malata/smba1002/files/nvram.txt:system/etc/wifi/nvram.txt
 

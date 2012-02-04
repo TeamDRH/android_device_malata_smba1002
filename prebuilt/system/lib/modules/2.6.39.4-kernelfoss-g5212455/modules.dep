@@ -1,6 +1,0 @@
-kernel/arch/arm/mach-tegra/baseband-xmm-power2.ko:
-kernel/drivers/scsi/scsi_wait_scan.ko:
-kernel/drivers/net/wireless/bcm4329/bcm4329.ko:
-kernel/drivers/media/video/videobuf2-memops.ko:
-kernel/drivers/media/video/videobuf2-vmalloc.ko: kernel/drivers/media/video/videobuf2-memops.ko
-kernel/drivers/media/video/vivi.ko: kernel/drivers/media/video/videobuf2-vmalloc.ko kernel/drivers/media/video/videobuf2-memops.ko
