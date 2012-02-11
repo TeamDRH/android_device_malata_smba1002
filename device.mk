@@ -27,10 +27,10 @@ endif
 
 DEVICE_PACKAGE_OVERLAYS := device/malata/smba1002/overlay
 
-# uses mdpi artwork where available
-PRODUCT_AAPT_CONFIG := normal mdpi
-PRODUCT_AAPT_PREF_CONFIG := mdpi
-PRODUCT_LOCALES += mdpi
+# uses ldpi artwork where available
+PRODUCT_AAPT_CONFIG := normal ldpi mdpi
+PRODUCT_AAPT_PREF_CONFIG := ldpi
+PRODUCT_LOCALES += en_US
 
 # Set default USB interface
 PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
