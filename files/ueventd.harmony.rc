@@ -8,6 +8,7 @@
 /dev/ov2710             0660    media   camera
 /dev/mt9d115            0600    media   camera
 /dev/mt9p111            0660    media   camera
+/dev/mt9v113            0660    media   camera
 /dev/ltc3216            0600    media   camera
 /dev/ad5820             0600    media   camera
 /dev/tegra_camera       0660    media   camera
