@@ -13,6 +13,11 @@ PRODUCT_BUILD_PROP_OVERRIDES += PRODUCT_NAME=soju BUILD_ID=IML74K BUILD_FINGERPR
 PRODUCT_PACKAGES += \
     Gallery
 
+# Additional CM Packages for TeamDRH build
+PRODUCT_PACKAGES += \
+    DSPManager \
+    libcyanogen-dsp
+
 # Prebuilt Product Packages
 PRODUCT_PACKAGES += \
     Elixir \
