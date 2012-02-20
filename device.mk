@@ -43,6 +43,7 @@ PRODUCT_COPY_FILES := \
     device/malata/smba1002/files/init.harmony.rc:root/init.harmony.rc \
     device/malata/smba1002/files/init.harmony.usb.rc:root/init.harmony.usb.rc \
     device/malata/smba1002/files/ueventd.harmony.rc:root/ueventd.harmony.rc \
+    device/malata/smba1002/files/bcmdhd.cal:system/etc/wifi/bcmdhd.cal \
     device/malata/smba1002/files/nvram.txt:system/etc/wifi/nvram.txt
 
 # Modules (moved to smba1002-modules.mk)
@@ -53,7 +54,7 @@ PRODUCT_COPY_FILES := \
 # Bluetooth
 PRODUCT_COPY_FILES += \
     device/malata/smba1002/files/bcm4329.hcd:system/etc/firmware/bcm4329.hcd
-	
+
 # Touchscreen
 PRODUCT_COPY_FILES += \
     device/malata/smba1002/files/at168_touch.idc:system/usr/idc/at168_touch.idc 
@@ -132,6 +133,9 @@ PRODUCT_PACKAGES += \
 # Filesystem management tools
 PRODUCT_PACKAGES += \
 	setup_fs
+
+WIFI_BAND := 802_11_ABG
+$(call inherit-product-if-exists, hardware/broadcom/wlan/bcmdhd/firmware/bcm4329/device-bcm.mk)
 
 # for bugmailer
 ifneq ($(TARGET_BUILD_VARIANT),user)
