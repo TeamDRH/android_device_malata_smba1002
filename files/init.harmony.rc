@@ -9,11 +9,11 @@ on early-init
     mkdir /mnt/microsd 0000 system system
     mkdir /mnt/usbdrive 0666 system system
 
-
     # for backwards compatibility
     symlink /mnt/sdcard /sdcard
     symlink /mnt/usbdrive /usbdrive
     symlink /mnt/microsd /microsd
+
 on fs
     # Mount /system rw first to give the filesystem a chance to save a checkpoint
     mount yaffs2 mtd@system /system
@@ -21,8 +21,6 @@ on fs
     setprop ro.crypto.tmpfs_options size=128m,mode=0771,uid=1000,gid=1000
     mount ext4 /dev/block/mmcblk0p2 /data wait noatime nodiratime noauto_da_alloc nosuid nodev
     mount yaffs2 mtd@cache /cache wait noatime nosuid nodev
-    setprop ro.crypto.fuse_sdcard true
-
 
 on post-fs-data
     mkdir /data/misc/wifi 0770 wifi wifi
@@ -30,15 +28,8 @@ on post-fs-data
     mkdir /data/misc/dhcp 0770 dhcp dhcp
     chown dhcp dhcp /data/misc/dhcp
 
-    # we will remap this as /mnt/sdcard with the sdcard fuse tool
-    mkdir /data/media 0775 media_rw media_rw
-    chown media_rw media_rw /data/media
-
     # Set indication (checked by vold) that we have finished this action
     setprop vold.post_fs_data_done 1
-
-    chmod 0660 /dev/usb_mtp_gadget
-    chown system system /dev/usb_mtp_gadget
 
 on boot
 
@@ -71,16 +62,14 @@ on boot
     chmod 666 /dev/nvhost-vi
     chmod 664 /sys/bus/iio/devices/device0/lux
     chmod 664 /sys/bus/iio/devices/device0/proxim_ir
-    chmod 777 /dev/phmem
-    chown system system /dev/phmem
 
 # Power management settings
     write /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq 216000
     write /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq 1000000
-    write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor interactive
+    write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor ondemand
     write /sys/devices/system/cpu/cpu1/cpufreq/scaling_min_freq 216000
     write /sys/devices/system/cpu/cpu1/cpufreq/scaling_max_freq 1000000
-    write /sys/devices/system/cpu/cpu1/cpufreq/scaling_governor interactive
+    write /sys/devices/system/cpu/cpu1/cpufreq/scaling_governor ondemand
     write /sys/devices/system/cpu/cpufreq/interactive/go_maxspeed_load 80
 
 # Default Read Ahead value for sdcards
@@ -88,12 +77,12 @@ on boot
     write /sys/block/mmcblk1/queue/read_ahead_kb 2048
 
 # GPS
-#    mkdir /data/gps
-#    chown system system /data/gps
-#    chmod 770 /data/gps
+    mkdir /data/gps
+    chown system system /data/gps
+    chmod 770 /data/gps
 
 service wpa_supplicant /system/bin/wpa_supplicant \
-    -Dwext -iwlan0 -c/data/misc/wifi/wpa_supplicant.conf
+    -Dnl80211 -iwlan0 -c/data/misc/wifi/wpa_supplicant.conf
 #   we will start as root and wpa_supplicant will switch to user wifi
 #   after setting up the capabilities required for WEXT
 #   user wifi
@@ -117,19 +106,6 @@ service iprenew_wlan0 /system/bin/dhcpcd -n
     disabled
     oneshot
 
-# create virtual SD card at /mnt/sdcard, based on the /data/media directory
-# deamon will drop to user/group system/media_rw after initializing
-# underlying files in /data/media wil be created with user and group media_rw (1023)
-#service sdcard /system/bin/sdcard /data/media 1023 1023
-#    class late_start
-
-# bugreport is triggered by the VOLUME-DOWN and VOLUME-UP keys
-service bugreport /system/bin/dumpstate -d -v -o /data/storage/bugreports/bugreport
-    class main
-    disabled
-    oneshot
-    keycodes 115 114
-
 #BCM
 service hciattach /system/bin/brcm_patchram_plus --enable_hci \
     --baudrate 921600 --use_baudrate_for_download --patchram /system/etc/firmware/bcm4329.hcd --tosleep 50000 \
@@ -140,47 +116,13 @@ service hciattach /system/bin/brcm_patchram_plus --enable_hci \
     oneshot
     disabled
 
-# Start GPS daemon
-#service gps-daemon /system/bin/glgps_nvidiaTegra2android -c /system/etc/gps/gpsconfig.xml
-#    class late_start
-#    user root
-#    group root
-
-# Mount usb drives as /usbdrive. Generally usb drives are formatted with FAT
-# filesystem, so we support FAT as of now.
-on device-added-/sys/block/sda
-    mount vfat /dev/block/sda /mnt/usbdrive
-
-on device-removed-/sys/block/sda
-    umount /mnt/usbdrive
-
-
-
-#Prepare TF service
-#service tf_daemon /system/bin/tf_daemon -storageDir /data/tf
-#    disabled
-#    class main
-#    user root
-#    group shell
-#    oneshot
-
-#Create data directory and start service
-on property:tf.enable=y
-    mkdir /data/tf
-    start tf_daemon
-
-# cmd_server service
-service cmd_server /system/bin/cmd_server_daemon
-    class late_start
-    user root
-
 # Enable tcpdump-service
-service netdump-service /system/xbin/tcpdump -i any -C 5 -p -s 0 -w /sdcard/netdump.cap
-    user root
-    disabled
+#service netdump-service /system/xbin/tcpdump -i any -C 5 -p -s 0 -w /sdcard/netdump.cap
+#    user root
+#    disabled
 
-on property:net.netdump.enable=1
-    start netdump-service
+#on property:net.netdump.enable=1
+#    start netdump-service
 
-on property:net.netdump.enable=0
-    stop netdump-service
+#on property:net.netdump.enable=0
+#    stop netdump-service
