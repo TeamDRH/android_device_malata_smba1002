@@ -16,10 +16,12 @@ PRODUCT_PACKAGES += \
 # Additional CM Packages for TeamDRH build
 PRODUCT_PACKAGES += \
     DSPManager \
-    libcyanogen-dsp
+    libcyanogen-dsp \
+    FileManager
 
 # Prebuilt Product Packages
 PRODUCT_PACKAGES += \
+    DRH-News \
     Elixir \
     RootBrowserFree
 

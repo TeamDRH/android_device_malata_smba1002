@@ -17,17 +17,7 @@
  */
 -->
 <resources>
-    <bool name="def_accelerometer_rotation">true</bool>
-    <bool name="def_screen_brightness_automatic_mode">false</bool>
-    <bool name="def_install_non_market_apps">true</bool>
-
-    <bool name="def_usb_mass_storage_enabled">true</bool>
-    <bool name="def_wifi_on">false</bool>
-    <bool name="def_networks_available_notification_on">true</bool>
-
-    <!-- Notifications use ringer volume -->
-    <bool name="def_notifications_use_ring_volume">false</bool>
-
-    <!-- Default for Settings.System.VIBRATE_IN_SILENT -->
-    <bool name="def_vibrate_in_silent">false</bool>
+    <bool name="config_recents_interface_for_tablets">true</bool>
+    <string name="notifications_off_title">Notifications off</string>
+    <string name="notifications_off_text">Tap here to turn notifications back on.</string>
 </resources>
