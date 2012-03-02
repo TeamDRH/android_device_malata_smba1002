@@ -1,6 +1,0 @@
-kernel/fs/ntfs/ntfs.ko
-kernel/drivers/scsi/scsi_wait_scan.ko
-kernel/drivers/net/tun.ko
-kernel/drivers/input/joystick/xpad.ko
-kernel/drivers/input/ff-memless.ko
-kernel/drivers/hid/hid-sony.ko
