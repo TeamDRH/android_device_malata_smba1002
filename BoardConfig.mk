@@ -42,7 +42,7 @@ BOARD_KERNEL_BASE := 0x10000000
 #Test CMDLINE
 #BOARD_KERNEL_CMDLINE := mem=512M@0M video=tegrafb console=ttyUSB0,115200n8 androidboot.console=ttyUSB0 tegraboot=nand mtdparts=tegra_nand:16384K@7424K(misc),16384K@62208K(recovery),16384K@79104K(boot),204800K@96000K(system),222464K@301312K(cache),4096K@24320K(bootbmp),32768K@28928K(logodata)
 
-BOARD_KERNEL_CMDLINE := mem=512M@0M video=tegrafb console=ttyUSB0,115200n8 androidboot.console=ttyUSB0 tegraboot=nand mtdparts=tegra_nand:16384K@7424K(misc),16384K@62208K(recovery),16384K@79104K(boot),256000K@96000K(system),171264K@352512K(cache),4096K@24320K(bootbmp),32768K@28928K(logodata)
+#BOARD_KERNEL_CMDLINE := mem=512M@0M video=tegrafb console=ttyUSB0,115200n8 androidboot.console=ttyUSB0 tegraboot=nand mtdparts=tegra_nand:16384K@7424K(misc),16384K@62208K(recovery),16384K@79104K(boot),256000K@96000K(system),171264K@352512K(cache),4096K@24320K(bootbmp),32768K@28928K(logodata)
 
 #androidboot.carrier=wifi-only product_type=w
 BOARD_PAGE_SIZE := 0x00000800
