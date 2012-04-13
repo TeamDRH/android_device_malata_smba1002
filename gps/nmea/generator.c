@@ -172,7 +172,7 @@ int nmea_igen_static_loop(nmeaGENERATOR *gen, nmeaINFO *info)
 {
     nmea_time_now(&info->utc);
     return 1;
-};
+}
 
 int nmea_igen_static_reset(nmeaGENERATOR *gen, nmeaINFO *info)
 {
@@ -237,7 +237,7 @@ int nmea_igen_rotate_loop(nmeaGENERATOR *gen, nmeaINFO *info)
     }
 
     return 1;
-};
+}
 
 int nmea_igen_rotate_reset(nmeaGENERATOR *gen, nmeaINFO *info)
 {
@@ -308,12 +308,12 @@ int nmea_igen_pos_rmove_loop(nmeaGENERATOR *gen, nmeaINFO *info)
     info->declination = info->direction;
 
     return 1;
-};
+}
 
 int nmea_igen_pos_rmove_destroy(nmeaGENERATOR *gen)
 {
     return 1;
-};
+}
 
 /*
  * generator create

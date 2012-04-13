@@ -8,23 +8,25 @@
 #include <pthread.h>
 #include <time.h>
 #include <sys/stat.h>
+#include <fcntl.h>
 #include <string.h>
 #include <math.h>
+#include <unistd.h>
 #include "nmea/nmea/nmea.h"
 
-//#define  GPS_DEBUG  1
+//#define GPS_DEBUG	1
 
-#define  LOG_TAG  "gps_adam"
-#define GPS_TTYPORT "/dev/ttyHS3"
-#define MAX_NMEA_CHARS 85
+#define LOG_TAG		"gps_adam"
+#define GPS_TTYPORT	"/dev/ttyHS3"
+#define GPS_POWER_CTRL	"/sys/devices/platform/smba1002-pm-gps/power_on"
+#define MAX_NMEA_CHARS	85
 
-
-#define MASK_GSV_MSG1 0x0001
-#define MASK_GSV_MSG2 0x0002
-#define MASK_GSV_MSG3 0x0004
+#define MASK_GSV_MSG1	0x0001
+#define MASK_GSV_MSG2	0x0002
+#define MASK_GSV_MSG3	0x0004
 
 //Mirror the define in nmea/nmea/info.h
-#define NMEA_MAXSATS (12)
+#define NMEA_MAXSATS	12
 
 #if GPS_DEBUG
 #define LOGV(...) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
@@ -35,80 +37,88 @@
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
 
 static GpsInterface adamGpsInterface;
-static GpsCallbacks* adamGpsCallbacks;
+static GpsCallbacks *adamGpsCallbacks;
 static pthread_t NMEAThread;
-char NMEA[MAX_NMEA_CHARS];
-pthread_mutex_t mutGPS = PTHREAD_MUTEX_INITIALIZER;
-char gpsOn = 0;
-GpsSvStatus *storeSV = NULL;
-int svMask = 0;
-pthread_mutex_t mutGSV = PTHREAD_MUTEX_INITIALIZER;
+static char NMEA[MAX_NMEA_CHARS];
+static pthread_mutex_t mutGPS = PTHREAD_MUTEX_INITIALIZER;
+static char gpsOn = 0;
+static int gps_pfd = -1;
+static GpsSvStatus *storeSV = NULL;
+static int svMask = 0;
+static pthread_mutex_t mutGSV = PTHREAD_MUTEX_INITIALIZER;
 
-pthread_mutex_t mutUseMask = PTHREAD_MUTEX_INITIALIZER;
-uint32_t useMask = 0;
+static pthread_mutex_t mutUseMask = PTHREAD_MUTEX_INITIALIZER;
+static uint32_t useMask = 0;
 
-typedef struct _argsCarrier
-{
-	char* 		NMEA;
-	nmeaINFO*	info;
+typedef struct _argsCarrier {
+	char *NMEA;
+	nmeaINFO *info;
 
 } argsCarrier;
 
-typedef struct _nmeaArgs
-{
-	char* NMEA;
+typedef struct _nmeaArgs {
+	char *NMEA;
 	GpsUtcTime time;
 } nmeaArgs;
 /////////////////////////////////////////////////////////
-//			GPS THREAD		       //
+//                      GPS THREAD                     //
 /////////////////////////////////////////////////////////
 
-static void updateStatus(void* arg) {
+static void
+updateStatus(void *arg)
+{
 	if (adamGpsCallbacks != NULL) {
-		adamGpsCallbacks->status_cb((GpsStatus*)arg);
+		adamGpsCallbacks->status_cb((GpsStatus *) arg);
 	}
 	free(arg);
 }
 
-
-static GpsUtcTime getUTCTime(nmeaTIME *time) {
-	GpsUtcTime ret = time->year*(31556926);
-	ret += time->mon*(2629743);
-	ret += time->day*(86400);
-	ret += time->hour*(3600);
-	ret += time->min*(60);
-	ret += time->sec*(1);
-	ret *= 1000; // Scale up to milliseconds
-	ret += time->hsec*(10);
+static GpsUtcTime
+getUTCTime(nmeaTIME * time)
+{
+	GpsUtcTime ret = time->year * (31556926);
+	ret += time->mon * (2629743);
+	ret += time->day * (86400);
+	ret += time->hour * (3600);
+	ret += time->min * (60);
+	ret += time->sec * (1);
+	ret *= 1000;			// Scale up to milliseconds
+	ret += time->hsec * (10);
 	return ret;
 }
 
-static double convertCoord(double coord) {
+static double
+convertCoord(double coord)
+{
 	// dddmm.mmm -> dddd.ddddd, etc
 	double degrees;
-	double mins = modf(coord/100.0f, &degrees);
-	degrees += mins*100.0/60.0f;
+	double mins = modf(coord / 100.0f, &degrees);
+	degrees += mins * 100.0 / 60.0f;
 	return degrees;
 }
 
-static void updateNMEA(void* arg) {
-	nmeaArgs *Args = (nmeaArgs*)arg;
+static void
+updateNMEA(void *arg)
+{
+	nmeaArgs *Args = (nmeaArgs *) arg;
 	GpsUtcTime time = Args->time;
-	char* NMEA2 = Args->NMEA;
+	char *NMEA2 = Args->NMEA;
 	//LOGV("Debug GPS: %s", NMEA2);
 	if (adamGpsCallbacks != NULL) {
 		adamGpsCallbacks->nmea_cb(time, NMEA2, strlen(NMEA2));
 	}
 	free(NMEA2);
-	free(arg);	
+	free(arg);
 }
 
 // No real need for this function.
 // GGA does the same and more.
-static void updateRMC(void* arg) {
-	argsCarrier *Args = (argsCarrier*)arg;
+static void
+updateRMC(void *arg)
+{
+	argsCarrier *Args = (argsCarrier *) arg;
 	nmeaINFO *info = Args->info;
-	char* NMEA2 = Args->NMEA;
+	char *NMEA2 = Args->NMEA;
 	GpsLocation newLoc;
 
 	if (info->sig == 0) {
@@ -116,7 +126,7 @@ static void updateRMC(void* arg) {
 		goto endRMC;
 	}
 
-	newLoc.size = sizeof(GpsLocation);
+	newLoc.size = sizeof (GpsLocation);
 	newLoc.flags = GPS_LOCATION_HAS_LAT_LONG;
 	newLoc.latitude = convertCoord(info->lat);
 	newLoc.longitude = convertCoord(info->lon);
@@ -125,51 +135,53 @@ static void updateRMC(void* arg) {
 	if (adamGpsCallbacks != NULL) {
 		adamGpsCallbacks->location_cb(&newLoc);
 	}
-	endRMC:
+endRMC:
 	free(info);
 	free(NMEA2);
 	free(arg);
 }
 
-static void updateGSA(void* arg) {
-	argsCarrier *Args = (argsCarrier*)arg;
+static void
+updateGSA(void *arg)
+{
+	argsCarrier *Args = (argsCarrier *) arg;
 	nmeaINFO *info = Args->info;
-	char* NMEA2 = Args->NMEA;
-	nmeaGPGSA *pack = malloc(sizeof(nmeaGPGSA));
+	char *NMEA2 = Args->NMEA;
+	nmeaGPGSA *pack = malloc(sizeof (nmeaGPGSA));
 	nmea_parse_GPGSA(NMEA2, strlen(NMEA2), pack);
 	int count = 0;
 	pthread_mutex_lock(&mutUseMask);
 	useMask = 0;
 	for (count = 0; count < NMEA_MAXSATS; count++) {
-		if (pack->sat_prn[count] != 0)
-		{
+		if (pack->sat_prn[count] != 0) {
 			LOGV("%i is in use", pack->sat_prn[count]);
-			useMask |= (1 << (pack->sat_prn[count]-1));
+			useMask |= (1 << (pack->sat_prn[count] - 1));
 		}
 	}
 	pthread_mutex_unlock(&mutUseMask);
 
-	endRMC:
 	free(pack);
 	free(info);
 	free(NMEA2);
 	free(arg);
 }
 
-static void updateGGA(void* arg) {
-	argsCarrier *Args = (argsCarrier*)arg;
+static void
+updateGGA(void *arg)
+{
+	argsCarrier *Args = (argsCarrier *) arg;
 	nmeaINFO *info = Args->info;
-	char* NMEA2 = Args->NMEA;
+	char *NMEA2 = Args->NMEA;
 	GpsLocation newLoc;
 	GpsStatus gpsStat;
 
-	gpsStat.size = sizeof(gpsStat);
+	gpsStat.size = sizeof (gpsStat);
 	if (info->sig == 0) {
 		LOGV("No valid fix data.");
 		goto endGGA;
 	}
 
-	newLoc.size = sizeof(GpsLocation);
+	newLoc.size = sizeof (GpsLocation);
 	newLoc.flags = GPS_LOCATION_HAS_LAT_LONG | GPS_LOCATION_HAS_ALTITUDE | GPS_LOCATION_HAS_ACCURACY;
 	newLoc.accuracy = info->HDOP;
 	newLoc.altitude = info->elv;
@@ -180,17 +192,20 @@ static void updateGGA(void* arg) {
 	if (adamGpsCallbacks != NULL) {
 		adamGpsCallbacks->location_cb(&newLoc);
 	}
-	endGGA:	
+endGGA:
 	free(info);
 	free(NMEA2);
 	free(arg);
 }
-static void updateGSV(void* arg) {
+
+static void
+updateGSV(void *arg)
+{
 	// This is NOT thread safe, block until it's our turn.
 	pthread_mutex_lock(&mutGSV);
-	argsCarrier *Args = (argsCarrier*)arg;
+	argsCarrier *Args = (argsCarrier *) arg;
 	nmeaINFO *info = Args->info;
-	char* NMEA2 = Args->NMEA;
+	char *NMEA2 = Args->NMEA;
 	nmeaSATINFO sats = info->satinfo;
 	int num = sats.inview;
 	int count = 0;
@@ -199,52 +214,51 @@ static void updateGSV(void* arg) {
 	int msgNumber = NMEA2[9] - 48;
 
 	//LOGV("Updating %i sats: msg %i/%i", num, numMessages, msgNumber);
-	
+
 	switch (msgNumber) {
-	
+
 	case (1):
 		if (svMask & MASK_GSV_MSG1) {
-		// We already have a message one.. dump the old, run with the new.
-		free(storeSV);
-		storeSV = NULL;
-		svMask = 0;
-		} 
+			// We already have a message one.. dump the old, run with the new.
+			free(storeSV);
+			storeSV = NULL;
+			svMask = 0;
+		}
 		svMask |= MASK_GSV_MSG1;
 		break;
 	case (2):
 		if (svMask & MASK_GSV_MSG2) {
-		// We already have a message two.. dump the old, run with the new.
-		free(storeSV);
-		storeSV = NULL;
-		svMask = 0;
-		} 
+			// We already have a message two.. dump the old, run with the new.
+			free(storeSV);
+			storeSV = NULL;
+			svMask = 0;
+		}
 		svMask |= MASK_GSV_MSG2;
 		break;
 	case (3):
 		if (svMask & MASK_GSV_MSG3) {
-		// We already have a message three.. dump the old, run with the new.
-		free(storeSV);
-		storeSV = NULL;
-		svMask = 0;
-		} 
+			// We already have a message three.. dump the old, run with the new.
+			free(storeSV);
+			storeSV = NULL;
+			svMask = 0;
+		}
 		svMask |= MASK_GSV_MSG3;
 		break;
 	default:
 		// We should never be here..
 		break;
 	}
-	
 
 	// Retrieve stored messages
 	if (storeSV == NULL) {
 		//  No Msgs stored, allocate new memory
-		svStatus = malloc(sizeof(GpsSvStatus));
+		svStatus = malloc(sizeof (GpsSvStatus));
 	} else {
 		svStatus = storeSV;
 	}
 
-	for (count = (msgNumber-1)*4; ((count < num) && (count < 4*msgNumber)); count++) {
-		svStatus->sv_list[count].size = sizeof(GpsSvInfo);
+	for (count = (msgNumber - 1) * 4; ((count < num) && (count < 4 * msgNumber)); count++) {
+		svStatus->sv_list[count].size = sizeof (GpsSvInfo);
 		svStatus->sv_list[count].prn = sats.sat[count].id;
 		svStatus->sv_list[count].snr = sats.sat[count].sig;
 		svStatus->sv_list[count].elevation = sats.sat[count].elv;
@@ -252,7 +266,6 @@ static void updateGSV(void* arg) {
 		//LOGV("ID: %i; SIG: %i; ELE: %i; AZI: %i", sats.sat[count].id, sats.sat[count].sig, sats.sat[count].elv, sats.sat[count].azimuth);
 	}
 
-	
 	switch (numMessages) {
 	case 1:
 		// Only one msg, and we're it
@@ -285,12 +298,11 @@ static void updateGSV(void* arg) {
 		LOGE("Logic error in GSV! numMessages: %i", numMessages);
 		goto gsvEnd;
 	}
-		
 
 	///////////////////////////////////////////////////////
-	deliverMsg:
-	svStatus->size = sizeof(GpsSvStatus);
-	svStatus->num_svs = num; 
+deliverMsg:
+	svStatus->size = sizeof (GpsSvStatus);
+	svStatus->num_svs = num;
 	// TODO: Make these accurate
 	svStatus->ephemeris_mask = 0;
 	svStatus->almanac_mask = 0;
@@ -300,35 +312,36 @@ static void updateGSV(void* arg) {
 	if (adamGpsCallbacks != NULL) {
 		adamGpsCallbacks->sv_status_cb(svStatus);
 	}
-
 	//LOGV("Pushing data");
-	free(svStatus);		
+	free(svStatus);
 	storeSV = NULL;
 	svMask = 0;
-	//////////////////////////////////////////////////////	
-	gsvEnd:
+	//////////////////////////////////////////////////////  
+gsvEnd:
 	free(info);
 	free(NMEA2);
 	free(arg);
 	pthread_mutex_unlock(&mutGSV);
 }
 
-void processNMEA() {
-	argsCarrier *Args = malloc(sizeof(argsCarrier));
-	nmeaArgs *nArgs = malloc(sizeof(nmeaArgs));      
-	nmeaINFO *info = malloc(sizeof(nmeaINFO));
-        nmeaPARSER parser;
-        nmea_zero_INFO(info);
-        nmea_parser_init(&parser);
+void
+processNMEA()
+{
+	argsCarrier *Args = malloc(sizeof (argsCarrier));
+	nmeaArgs *nArgs = malloc(sizeof (nmeaArgs));
+	nmeaINFO *info = malloc(sizeof (nmeaINFO));
+	nmeaPARSER parser;
+	nmea_zero_INFO(info);
+	nmea_parser_init(&parser);
 	char *NMEA2;
 	nmeaINFO info2;
 	// Fix up the end so the NMEA parser accepts it
-	int count = (int)strlen(NMEA);
-	NMEA[count-1] = '\r';
+	int count = (int) strlen(NMEA);
+	NMEA[count - 1] = '\r';
 	NMEA[count] = '\n';
-	NMEA[count+1] = '\0';
+	NMEA[count + 1] = '\0';
 	// Parse the data
-	nmea_parse(&parser, NMEA, (int)strlen(NMEA), info);
+	nmea_parse(&parser, NMEA, (int) strlen(NMEA), info);
 
 	if (info->smask == 0) {
 		//Bad data
@@ -339,34 +352,34 @@ void processNMEA() {
 	}
 	// NOTE: Make copy of NMEA and Data for these threads - Don't want them to be overwritten by other threads
 	// Have the individual case function take care of freeing them
-	Args->NMEA = (char *)malloc((strlen(&NMEA[0])+1)*sizeof(char));
-	nArgs->NMEA = (char *)malloc((strlen(&NMEA[0])+1)*sizeof(char));
+	Args->NMEA = (char *) malloc((strlen(&NMEA[0]) + 1) * sizeof (char));
+	nArgs->NMEA = (char *) malloc((strlen(&NMEA[0]) + 1) * sizeof (char));
 	strcpy(Args->NMEA, NMEA);
 	strcpy(nArgs->NMEA, NMEA);
 	Args->info = info;
 	nArgs->time = getUTCTime(&(info->utc));
-	
+
 	adamGpsCallbacks->create_thread_cb("adamgps-nmea", updateNMEA, nArgs);
-	
+
 	switch (info->smask) {
 	case 1:
 		//< GGA - Essential fix data which provide 3D location and accuracy data.
 		adamGpsCallbacks->create_thread_cb("adamgps-gga", updateGGA, Args);
 		break;
-	case 2: 
+	case 2:
 		//< GSA - GPS receiver operating mode, SVs used for navigation, and DOP values.
 		adamGpsCallbacks->create_thread_cb("adamgps-gsa", updateGSA, Args);
 		break;
-	case 4: 
+	case 4:
 		//< GSV - Number of SVs in view, PRN numbers, elevation, azimuth & SNR values.
 		adamGpsCallbacks->create_thread_cb("adamgps-gsv", updateGSV, Args);
 		break;
-	case 8: 
+	case 8:
 		//< RMC - Recommended Minimum Specific GPS/TRANSIT Data.
 		//adamGpsCallbacks->create_thread_cb("adamgps-loc", updateRMC, Args);
 		free(Args->info);
 		free(Args->NMEA);
-		free(Args);			
+		free(Args);
 		break;
 	case 16:
 		//< VTG - Actual track made good and speed over ground.
@@ -381,17 +394,18 @@ void processNMEA() {
 		break;
 	}
 
-	//LOGV("Successful read: %i", info->smask);	
+	//LOGV("Successful read: %i", info->smask);     
 }
 
-
-static void* doGPS (void* arg) {
+static void *
+doGPS(void *arg)
+{
 	FILE *gpsTTY = NULL;
-	char* buffer = NULL;
+	char *buffer = NULL;
 
-        // Maximum NMEA sentence SHOULD be 80 characters  + terminators - include a small safety buffer 
+	// Maximum NMEA sentence SHOULD be 80 characters  + terminators - include a small safety buffer 
 	struct timespec slp;
-	char go = 1;	
+	char go = 1;
 	slp.tv_sec = 1;
 	slp.tv_nsec = 0;
 	// Open the GPS port
@@ -416,110 +430,153 @@ static void* doGPS (void* arg) {
 			processNMEA();
 			// Get rid of the extra LF
 			fgetc(gpsTTY);
-		} 
+		}
 		pthread_mutex_lock(&mutGPS);
 		go = gpsOn;
 		pthread_mutex_unlock(&mutGPS);
 	}
-fclose(gpsTTY);
-return NULL;
+	fclose(gpsTTY);
+	return NULL;
 }
 
-
-/////////////////////////////////////////////////////////
-//		     GPS INTERFACE       	       //
-/////////////////////////////////////////////////////////
-
-
-
-static int gpslib_init(GpsCallbacks* callbacks) {
-int ret = 0;
-LOGV("Callbacks set");
-adamGpsCallbacks = callbacks;
-adamGpsCallbacks->set_capabilities_cb(0);
-GpsStatus *status = malloc(sizeof(GpsStatus));
-
-struct stat st;
-if(stat(GPS_TTYPORT, &st) != 0) {
-	ret = -1;
-	LOGE("Specified tty port: %s does not exist", GPS_TTYPORT);
-	goto end;
+static void
+gps_power(int onoff)
+{
+	switch (onoff) {
+	case 0:	if (gps_pfd != -1) write(gps_pfd, "0", 1);
+		break;
+	case 1: if (gps_pfd != -1) write(gps_pfd, "1", 1);
+		break;
+	default:
+		LOGE("gps_power: error: given unknown onoff value %d.", onoff);
+		break;
+	}
 }
 
+/////////////////////////////////////////////////////////
+//                   GPS INTERFACE                     //
+/////////////////////////////////////////////////////////
 
-status->size = sizeof(GpsStatus);
-status->status = GPS_STATUS_ENGINE_ON;
-adamGpsCallbacks->create_thread_cb("adamgps-status", updateStatus, status);
+static int
+gpslib_init(GpsCallbacks * callbacks)
+{
+	int ret = 0;
+	LOGV("Callbacks set");
+	adamGpsCallbacks = callbacks;
+	adamGpsCallbacks->set_capabilities_cb(0);
+	GpsStatus *status = malloc(sizeof (GpsStatus));
+
+	struct stat st;
+	if (stat(GPS_TTYPORT, &st) != 0) {
+		ret = -1;
+		LOGE("Specified tty port: %s does not exist", GPS_TTYPORT);
+		goto end;
+	}
+
+	if (gps_pfd == -1) {
+		gps_pfd = open(GPS_POWER_CTRL, O_WRONLY);
+		if (gps_pfd == -1) {
+			ret = -1;
+			LOGE("Power control: open failed: %s. GPS will not be activated.", GPS_POWER_CTRL);
+			status->size = sizeof (GpsStatus);
+			status->status = GPS_STATUS_ENGINE_OFF;
+			adamGpsCallbacks->create_thread_cb("adamgps-status", updateStatus, status);
+			goto end;
+		}
+	}
+	status->size = sizeof (GpsStatus);
+	status->status = GPS_STATUS_ENGINE_ON;
+	adamGpsCallbacks->create_thread_cb("adamgps-status", updateStatus, status);
 
 end:
-return ret;
+	return ret;
 }
 
-static int gpslib_start() {
-LOGV("Gps start");
-GpsStatus *stat = malloc(sizeof(GpsStatus));
-stat->size = sizeof(GpsStatus);
-stat->status = GPS_STATUS_SESSION_BEGIN;
-adamGpsCallbacks->create_thread_cb("adamgps-status", updateStatus, stat);
-pthread_mutex_lock(&mutGPS);
-gpsOn = 1;
-pthread_mutex_unlock(&mutGPS);	
-pthread_create(&NMEAThread, NULL, doGPS, NULL);
-return 0;
+static int
+gpslib_start()
+{
+	LOGV("Gps start");
+	GpsStatus *stat = malloc(sizeof (GpsStatus));
+	stat->size = sizeof (GpsStatus);
+	stat->status = GPS_STATUS_SESSION_BEGIN;
+	adamGpsCallbacks->create_thread_cb("adamgps-status", updateStatus, stat);
+	pthread_mutex_lock(&mutGPS);
+	gpsOn = 1;
+	gps_power(gpsOn);
+	pthread_mutex_unlock(&mutGPS);
+	pthread_create(&NMEAThread, NULL, doGPS, NULL);
+	return 0;
 }
 
-static int gpslib_stop() {
-LOGV("GPS stop");
-GpsStatus *stat = malloc(sizeof(GpsStatus));
-stat->size = sizeof(GpsStatus);
-stat->status = GPS_STATUS_SESSION_END;
-adamGpsCallbacks->create_thread_cb("adamgps-status", updateStatus, stat);
-pthread_mutex_lock(&mutGPS);
-gpsOn = 0;
-pthread_mutex_unlock(&mutGPS);
-return 0;
+static int
+gpslib_stop()
+{
+	LOGV("GPS stop");
+	GpsStatus *stat = malloc(sizeof (GpsStatus));
+	stat->size = sizeof (GpsStatus);
+	stat->status = GPS_STATUS_SESSION_END;
+	adamGpsCallbacks->create_thread_cb("adamgps-status", updateStatus, stat);
+	pthread_mutex_lock(&mutGPS);
+	gpsOn = 0;
+	gps_power(gpsOn);
+	pthread_mutex_unlock(&mutGPS);
+	return 0;
 }
 
-static void gpslib_cleanup() {
-GpsStatus *stat = malloc(sizeof(GpsStatus));
-stat->size = sizeof(GpsStatus);
-stat->status = GPS_STATUS_ENGINE_OFF;
-adamGpsCallbacks->create_thread_cb("adamgps-status", updateStatus, stat);
-LOGV("GPS clean");
-return;
+static void
+gpslib_cleanup()
+{
+	GpsStatus *stat = malloc(sizeof (GpsStatus));
+	stat->size = sizeof (GpsStatus);
+	stat->status = GPS_STATUS_ENGINE_OFF;
+/*
+	if (gps_pfd != -1) {
+		close(gps_pfd);
+		gps_pfd = -1;
+	}
+*/
+	adamGpsCallbacks->create_thread_cb("adamgps-status", updateStatus, stat);
+	LOGV("GPS clean");
+	return;
 }
 
-static int gpslib_inject_time(GpsUtcTime time, int64_t timeReference,
-                         int uncertainty) {
-LOGV("GPS inject time");
-return 0;
+static int
+gpslib_inject_time(GpsUtcTime time, int64_t timeReference, int uncertainty)
+{
+	LOGV("GPS inject time");
+	return 0;
 }
 
-static int gpslib_inject_location(double latitude, double longitude, float accuracy) {
-LOGV("GPS inject location");
-return 0;
+static int
+gpslib_inject_location(double latitude, double longitude, float accuracy)
+{
+	LOGV("GPS inject location");
+	return 0;
 }
 
-
-static void gpslib_delete_aiding_data(GpsAidingData flags) {
+static void
+gpslib_delete_aiding_data(GpsAidingData flags)
+{
 
 }
 
-static int gpslib_set_position_mode(GpsPositionMode mode, GpsPositionRecurrence recurrence,
-            uint32_t min_interval, uint32_t preferred_accuracy, uint32_t preferred_time) {
-
-return 0;
+static int
+gpslib_set_position_mode(GpsPositionMode mode, GpsPositionRecurrence recurrence, uint32_t min_interval, uint32_t preferred_accuracy, uint32_t preferred_time)
+{
+	return 0;
 }
 
-
-static const void* gpslib_get_extension(const char* name) {
-return NULL;
+static const void *
+gpslib_get_extension(const char *name)
+{
+	return NULL;
 }
 
-const GpsInterface* gps__get_gps_interface(struct gps_device_t* dev) 
+const GpsInterface *
+gps__get_gps_interface(struct gps_device_t *dev)
 {
 	LOGV("Gps get_interface");
-	adamGpsInterface.size = sizeof(GpsInterface);
+	adamGpsInterface.size = sizeof (GpsInterface);
 	adamGpsInterface.init = gpslib_init;
 	adamGpsInterface.start = gpslib_start;
 	adamGpsInterface.stop = gpslib_stop;
@@ -532,23 +589,21 @@ const GpsInterface* gps__get_gps_interface(struct gps_device_t* dev)
 
 	return &adamGpsInterface;
 }
-	
-	
-static int open_gps(const struct hw_module_t* module, char const* name,
-	struct hw_device_t** device) 
+
+static int
+open_gps(const struct hw_module_t *module, char const *name, struct hw_device_t **device)
 {
-	struct gps_device_t *dev = malloc (sizeof(struct gps_device_t));
-	memset(dev, 0 , sizeof(*dev));
-	
+	struct gps_device_t *dev = malloc(sizeof (struct gps_device_t));
+	memset(dev, 0, sizeof (*dev));
+
 	dev->common.tag = HARDWARE_DEVICE_TAG;
 	dev->common.version = 0;
-	dev->common.module = (struct hw_module_t*)module;
+	dev->common.module = (struct hw_module_t *) module;
 	dev->get_gps_interface = gps__get_gps_interface;
-	
-	*device = (struct hw_device_t*)dev;
+
+	*device = (struct hw_device_t *) dev;
 	return 0;
 }
-
 
 static struct hw_module_methods_t gps_module_methods = {
 	.open = open_gps
