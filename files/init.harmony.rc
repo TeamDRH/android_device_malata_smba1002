@@ -97,12 +97,21 @@ service dhcpcd_wlan0 /system/bin/dhcpcd -ABKL
     disabled
     oneshot
 
+service dhcpcd_eth0 /system/bin/dhcpcd -ABKL
+    class main
+    disabled
+    oneshot
+
 # bluetooth
 service dhcpcd_bnep0 /system/bin/dhcpcd -ABKL
     disabled
     oneshot
 
 service iprenew_wlan0 /system/bin/dhcpcd -n
+    disabled
+    oneshot
+
+service iprenew_eth0 /system/bin/dhcpcd -n
     disabled
     oneshot
 
