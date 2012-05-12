@@ -54,6 +54,7 @@ alias symbol:input_ff_create_memless ff_memless
 alias symbol:xdr_shift_buf sunrpc
 alias symbol:svc_authenticate sunrpc
 alias symbol:xprt_release_xprt sunrpc
+alias symbol:gspca_frame_add gspca_main
 alias symbol:xdr_buf_subsegment sunrpc
 alias symbol:nfs4_reset_write nfs
 alias symbol:__rpc_wait_for_completion_task sunrpc
@@ -93,6 +94,7 @@ alias symbol:xdr_inline_decode sunrpc
 alias symbol:xdr_decode_string_inplace sunrpc
 alias symbol:svc_seq_show sunrpc
 alias symbol:rpc_init_priority_wait_queue sunrpc
+alias symbol:gspca_dev_probe2 gspca_main
 alias symbol:sunrpc_cache_pipe_upcall sunrpc
 alias symbol:xprt_adjust_cwnd sunrpc
 alias symbol:xdr_enter_page sunrpc
@@ -123,6 +125,7 @@ alias symbol:sunrpc_cache_unregister_pipefs sunrpc
 alias symbol:xprt_disconnect_done sunrpc
 alias symbol:cache_register sunrpc
 alias symbol:rpc_sleep_on sunrpc
+alias symbol:gspca_dev_probe gspca_main
 alias symbol:svc_drop sunrpc
 alias symbol:gss_mech_unregister auth_rpcgss
 alias symbol:auth_domain_lookup sunrpc
@@ -146,6 +149,7 @@ alias symbol:rpc_bind_new_program sunrpc
 alias symbol:csum_partial_copy_to_xdr sunrpc
 alias symbol:rpcauth_init_cred sunrpc
 alias symbol:put_rpccred sunrpc
+alias symbol:gspca_disconnect gspca_main
 alias symbol:locks_start_grace lockd
 alias symbol:svc_create_xprt sunrpc
 alias symbol:xprt_set_retrans_timeout_rtt sunrpc
@@ -158,6 +162,7 @@ alias symbol:svc_close_xprt sunrpc
 alias symbol:xdr_terminate_string sunrpc
 alias symbol:svc_print_addr sunrpc
 alias symbol:nlmclnt_done lockd
+alias symbol:gspca_suspend gspca_main
 alias symbol:nfs_initiate_commit nfs
 alias symbol:gss_mech_list_pseudoflavors auth_rpcgss
 alias symbol:cache_purge sunrpc
@@ -201,10 +206,13 @@ alias symbol:xdr_encode_word sunrpc
 alias symbol:auth_domain_find sunrpc
 alias symbol:rpc_restart_call_prepare sunrpc
 alias symbol:read_bytes_from_xdr_buf sunrpc
+alias symbol:gspca_debug gspca_main
 alias symbol:svc_addsock sunrpc
 alias symbol:svc_reserve sunrpc
 alias symbol:rpc_call_async sunrpc
+alias symbol:gspca_resume gspca_main
 alias symbol:rpc_get_mount sunrpc
+alias symbol:gspca_auto_gain_n_exposure gspca_main
 alias symbol:rpc_free_iostats sunrpc
 alias symbol:rpc_destroy_wait_queue sunrpc
 alias symbol:svcauth_unix_purge sunrpc

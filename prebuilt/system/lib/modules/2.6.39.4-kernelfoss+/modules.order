@@ -5,6 +5,7 @@ kernel/drivers/scsi/scsi_wait_scan.ko
 kernel/drivers/net/tun.ko
 kernel/drivers/input/joystick/xpad.ko
 kernel/drivers/input/ff-memless.ko
+kernel/drivers/media/video/gspca/gspca_main.ko
 kernel/drivers/hid/hid-sony.ko
 kernel/net/sunrpc/sunrpc.ko
 kernel/net/sunrpc/auth_gss/auth_rpcgss.ko
