@@ -40,53 +40,47 @@
 
 /* Mixer control names */
 #define MIXER_PCM_PLAYBACK_VOLUME     		"PCM Playback Volume"
-#define MIXER_PCM_CAPTURE_VOLUME     		"Rec Capture Volume"
+#define MIXER_PCM_CAPTURE_VOLUME		"Rec Capture Volume"
 
-#define MIXER_HEADSET_PLAYBACK_VOLUME       "Headphone Playback Volume"
-#define MIXER_SPEAKER_PLAYBACK_VOLUME       "Auxout Playback Volume"
-#define MIXER_AUXOUT_ENABLE                 "Auxout Playback Switch"
-#define MIXER_MIC_CAPTURE_VOLUME            "Mic1 Capture Volume" /*ok*/
-#define MIXER_HEADSET_OUTENABLE             "Headphone Playback Switch"
-#define MIXER_HEADSET_PLAYBACK_SWITCH       "Headphone Jack Switch"
-#define MIXER_SPEAKER_PLAYBACK_SWITCH       "Int Spk Switch"
-#define MIXER_MIC_CAPTURE_SWITCH            "Int Mic Switch"
+#define MIXER_SPEAKER_PLAYBACK_VOLUME		"Auxout Playback Volume"
+#define MIXER_SPEAKER_PLAYBACK_SWITCH		"Int Spk Switch"
 
-#define MIXER_HPL_OUTMUX                    "Left Headphone Mux"
-#define MIXER_HPR_OUTMUX                    "Right Headphone Mux"
-#define MIXER_AUX_OUTMUX                    "AuxOut Mux"
-#define MIXER_HP_ENABLE_DAC                 "HP Mix DAC2HP Playback Switch"
-#define MIXER_SPK_ENABLE_DAC                "Speaker Mix DAC2SPK Playback Switch"
+#define MIXER_HEADSET_PLAYBACK_VOLUME		"Headphone Playback Volume"
+#define MIXER_HEADSET_PLAYBACK_SWITCH		"Headphone Jack Switch"
 
-#define MIXER_HP_LEFT                       "HP Left Mix"
-#define MIXER_HP_RIGHT                      "HP Right Mix"
-#define MIXER_SPK                           "HPOut Mix"
+#define MIXER_MIC_CAPTURE_VOLUME		"Mic1 Capture Volume"
+#define MIXER_MIC_CAPTURE_SWITCH		"Int Mic Switch"
 
+#define MIXER_HEADSET_OUTENABLE			"Headphone Playback Switch"
+#define MIXER_AUXOUT_ENABLE			"Auxout Playback Switch"
 
+#define MIXER_HPL_OUTMUX			"Left Headphone Mux"
+#define MIXER_HPR_OUTMUX			"Right Headphone Mux"
+#define MIXER_AUX_OUTMUX			"AuxOut Mux"
+#define MIXER_HP_ENABLE_DAC			"HP Mix DAC2HP Playback Switch"
+#define MIXER_SPK_ENABLE_DAC			"Speaker Mix DAC2SPK Playback Switch"
+
+#define MIXER_HP_LEFT				"HP Left Mix"
+#define MIXER_HP_RIGHT				"HP Right Mix"
+#define MIXER_SPK				"HPOut Mix"
 
 /* ALSA card */
-#define CARD_SMBA1002 0
+#define CARD_SND 0
 
 /* ALSA ports for card0 */
 #define PORT_MM    0 /* CODEC port */
-#define PORT_VOICE 1 /* Bluetooth/3G port */
-#define PORT_SPDIF 2 /* SPDIF (HDMI) port */
+#define PORT_SPDIF 1 /* SPDIF (HDMI) port */
+#define PORT_VOICE 2 /* Bluetooth/3G port */
 
 /* Minimum granularity - Arbitrary but small value */
 #define CODEC_BASE_FRAME_COUNT 32
 
 /* number of base blocks in a short period (low latency) */
-#define SHORT_PERIOD_MULTIPLIER 16  /* 11 ms */
+#define PERIOD_MULTIPLIER 32  /* 11 ms */
 /* number of frames per short period (low latency) */
-#define SHORT_PERIOD_SIZE (CODEC_BASE_FRAME_COUNT * SHORT_PERIOD_MULTIPLIER)
+#define PERIOD_SIZE (CODEC_BASE_FRAME_COUNT * PERIOD_MULTIPLIER)
 /* number of pseudo periods for low latency playback */
-#define PLAYBACK_SHORT_PERIOD_COUNT 4
-
-/* number of short periods in a long period (low power) */
-#define LONG_PERIOD_MULTIPLIER 2  /*16*/ /* 341 ms */
-/* number of frames per long period (low power) */
-#define LONG_PERIOD_SIZE (SHORT_PERIOD_SIZE * LONG_PERIOD_MULTIPLIER)
-/* number of periods for low power playback */
-#define PLAYBACK_LONG_PERIOD_COUNT 2
+#define PLAYBACK_PERIOD_COUNT 4
 
 /* number of periods for capture */
 #define CAPTURE_PERIOD_COUNT 2
@@ -94,37 +88,37 @@
 /* minimum sleep time in out_write() when write threshold is not reached */
 #define MIN_WRITE_SLEEP_US 	5000
 
-#define RESAMPLER_BUFFER_FRAMES (SHORT_PERIOD_SIZE * 2)
+#define RESAMPLER_BUFFER_FRAMES (PERIOD_SIZE * 2)
 #define RESAMPLER_BUFFER_SIZE (4 * RESAMPLER_BUFFER_FRAMES)
 
-/* Default sampling rate reported to Android */
-#define DEFAULT_OUT_SAMPLING_RATE 44100
+/* Sampling rate reported to Android */
+#define ANDROID_SAMPLING_RATE 48000
 
-/* sampling rate when using MM low power port */
-#define MM_LOW_POWER_SAMPLING_RATE 44100
+/* sampling rate when using SPDIF port */
+#define MM_SPDIF_SAMPLING_RATE 48000
 
-/* sampling rate when using MM full power port */
-#define MM_FULL_POWER_SAMPLING_RATE 48000
+/* sampling rate when using codec port */
+#define MM_CODEC_SAMPLING_RATE 48000
 
 /* conversions from Percent to codec gains */
-#define PERC_TO_PCM_VOLUME(x)     ( (int)((x) * 31 )) 
-#define PERC_TO_CAPTURE_VOLUME(x) ( (int)((x) * 31 )) 
+#define PERC_TO_PCM_VOLUME(x)     ( (int)((x) * 31 ))
+#define PERC_TO_CAPTURE_VOLUME(x) ( (int)((x) * 31 ))
 #define PERC_TO_MIC_VOLUME(x)     ( (int)((x) * 31 ))
-#define PERC_TO_HEADSET_VOLUME(x) ( (int)((x) * 31 )) 
-#define PERC_TO_SPEAKER_VOLUME(x) ( (int)((x) * 31 )) 
+#define PERC_TO_HEADSET_VOLUME(x) ( (int)((x) * 31 ))
+#define PERC_TO_SPEAKER_VOLUME(x) ( (int)((x) * 31 ))
 
 struct pcm_config pcm_config_mm_out = {
     .channels = 2,
-    .rate = MM_FULL_POWER_SAMPLING_RATE,
-    .period_size = LONG_PERIOD_SIZE,
-    .period_count = PLAYBACK_LONG_PERIOD_COUNT,
+    .rate = MM_CODEC_SAMPLING_RATE,
+    .period_size = PERIOD_SIZE,
+    .period_count = PLAYBACK_PERIOD_COUNT,
     .format = PCM_FORMAT_S16_LE,
 };
 
 struct pcm_config pcm_config_mm_in = {
     .channels = 2,
-    .rate = MM_FULL_POWER_SAMPLING_RATE,
-    .period_size = SHORT_PERIOD_SIZE,
+    .rate = MM_CODEC_SAMPLING_RATE,
+    .period_size = PERIOD_SIZE,
     .period_count = CAPTURE_PERIOD_COUNT,
     .format = PCM_FORMAT_S16_LE,
 };
@@ -141,38 +135,38 @@ struct route_setting defaults[] = {
     /* general */
     {
         .ctl_name = MIXER_PCM_PLAYBACK_VOLUME,
-        .intval = 20,
+        .intval = PERC_TO_PCM_VOLUME(0.8),
     },
     {
-	.ctl_name = MIXER_PCM_CAPTURE_VOLUME,
-	.intval = PERC_TO_CAPTURE_VOLUME(0.8),
-    },
-    {
-        .ctl_name = MIXER_HEADSET_PLAYBACK_VOLUME,
-        .intval = PERC_TO_HEADSET_VOLUME(1),
+		.ctl_name = MIXER_PCM_CAPTURE_VOLUME,
+		.intval = PERC_TO_CAPTURE_VOLUME(0.8),
     },
     {
         .ctl_name = MIXER_SPEAKER_PLAYBACK_VOLUME,
-        .intval = 20,
-    },
-    {
-        .ctl_name = MIXER_MIC_CAPTURE_VOLUME,
-        .intval = PERC_TO_MIC_VOLUME(1),
-    },
-    {
-        .ctl_name = MIXER_HEADSET_PLAYBACK_SWITCH,
-        .intval = 0,
+        .intval = PERC_TO_SPEAKER_VOLUME(0.8),
     },
     {
         .ctl_name = MIXER_SPEAKER_PLAYBACK_SWITCH,
         .intval = 1,
     },
     {
+        .ctl_name = MIXER_HEADSET_PLAYBACK_VOLUME,
+        .intval = PERC_TO_HEADSET_VOLUME(0.8),
+    },
+    {
+        .ctl_name = MIXER_HEADSET_PLAYBACK_SWITCH,
+        .intval = 1,
+    },
+    {
+        .ctl_name = MIXER_MIC_CAPTURE_VOLUME,
+        .intval = PERC_TO_MIC_VOLUME(0.8),
+    },
+    {
         .ctl_name = MIXER_MIC_CAPTURE_SWITCH,
         .intval = 1,
     },
     {
-	.ctl_name = MIXER_HEADSET_OUTENABLE,
+        .ctl_name = MIXER_HEADSET_OUTENABLE,
         .intval = 1,
     },
     {
@@ -199,34 +193,29 @@ struct route_setting defaults[] = {
         .ctl_name = MIXER_AUXOUT_ENABLE,
         .intval = 1,
     },
-
     {
         .ctl_name = NULL,
     },
-
 };
 
 
 struct mixer_ctls
 {
-	
     struct mixer_ctl *pcm_volume;
     struct mixer_ctl *pcm_cap_volume;
-    struct mixer_ctl *headset_volume;
     struct mixer_ctl *speaker_volume;
-    struct mixer_ctl *mic_volume;
-    struct mixer_ctl *headset_switch;
     struct mixer_ctl *speaker_switch;
+    struct mixer_ctl *headset_volume;
+    struct mixer_ctl *headset_switch;
+    struct mixer_ctl *mic_volume;
     struct mixer_ctl *mic_switch;
-    struct mixer_ctl *LHPMux;
-    struct mixer_ctl *RHPMux;
-    struct mixer_ctl *SpkMux;
-    struct mixer_ctl *HPEnDAC;
-    struct mixer_ctl *SpkEnDAC;
+	struct mixer_ctl *LHPMux;
+	struct mixer_ctl *RHPMux;
+	struct mixer_ctl *SpkMux;
+	struct mixer_ctl *HPEnDAC;
+	struct mixer_ctl *SpkEnDAC;};
 
-};
-
-struct smba1002_audio_device {
+struct tegra_audio_device {
     struct audio_hw_device hw_device;
 
     pthread_mutex_t lock;       /* see note below on mutex acquisition order */
@@ -235,14 +224,13 @@ struct smba1002_audio_device {
     int mode;
     int devices;
     int in_call;
-    struct smba1002_stream_in *active_input;
-    struct smba1002_stream_out *active_output;
+    struct tegra_stream_in *active_input;
+    struct tegra_stream_out *active_output;
     bool mic_mute;
     struct echo_reference_itfe *echo_reference;
-	bool low_power; /* if system is in a low power state */
 };
 
-struct smba1002_stream_out {
+struct tegra_stream_out {
     struct audio_stream_out stream;
 
     pthread_mutex_t lock;       /* see note below on mutex acquisition order */
@@ -252,14 +240,13 @@ struct smba1002_stream_out {
     char *buffer;
     int standby;
     struct echo_reference_itfe *echo_reference;
-    struct smba1002_audio_device *dev;
+    struct tegra_audio_device *dev;
     int write_threshold;
-	bool low_power;				/* If the stream is in a low power playback mode */
 };
 
 #define MAX_PREPROCESSORS 3 /* maximum one AGC + one NS + one AEC per input stream */
 
-struct smba1002_stream_in {
+struct tegra_stream_in {
     struct audio_stream_in stream;
 
     pthread_mutex_t lock;       /* see note below on mutex acquisition order */
@@ -270,7 +257,7 @@ struct smba1002_stream_in {
     struct resampler_buffer_provider buf_provider;
     int16_t *buffer;
     size_t frames_in;
-    unsigned int requested_rate;
+    unsigned int requested_rate;	/* the android requested sample rate */
     int standby;
     int source;
     struct echo_reference_itfe *echo_reference;
@@ -285,7 +272,7 @@ struct smba1002_stream_in {
     size_t ref_frames_in;
     int read_status;
 
-    struct smba1002_audio_device *dev;
+    struct tegra_audio_device *dev;
 };
 
 /**
@@ -294,8 +281,8 @@ struct smba1002_stream_in {
  */
 
 static int adev_set_voice_volume(struct audio_hw_device *dev, float volume);
-static int do_input_standby(struct smba1002_stream_in *in);
-static int do_output_standby(struct smba1002_stream_out *out);
+static int do_input_standby(struct tegra_stream_in *in);
+static int do_output_standby(struct tegra_stream_out *out);
 
 /* The enable flag when 0 makes the assumption that enums are disabled by
  * "Off" and integers/booleans by 0 */
@@ -332,12 +319,12 @@ static int set_route_by_array(struct mixer *mixer, struct route_setting *route,
     return 0;
 }
 
-static void force_all_standby(struct smba1002_audio_device *adev)
+static void force_all_standby(struct tegra_audio_device *adev)
 {
 	LOGD("force_all_standby");
 	
-    struct smba1002_stream_in *in;
-    struct smba1002_stream_out *out;
+    struct tegra_stream_in *in;
+    struct tegra_stream_out *out;
 
     if (adev->active_output) {
         out = adev->active_output;
@@ -354,7 +341,7 @@ static void force_all_standby(struct smba1002_audio_device *adev)
     }
 }
 
-static void select_mode(struct smba1002_audio_device *adev)
+static void select_mode(struct tegra_audio_device *adev)
 {
 	LOGD("select_mode: %x",adev->mode);
 	
@@ -386,29 +373,36 @@ static void select_mode(struct smba1002_audio_device *adev)
 }
 
 /* must be called with hw device and output stream mutexes locked */
-static int start_output_stream(struct smba1002_stream_out *out)
+static int start_output_stream(struct tegra_stream_out *out)
 {
-    struct smba1002_audio_device *adev = out->dev;
-    unsigned int card = CARD_SMBA1002;
+    struct tegra_audio_device *adev = out->dev;
+    unsigned int card = CARD_SND;
     unsigned int port = PORT_MM;
+    int bt_on;
 
     adev->active_output = out;
 
 	/* If outputting to HDMI, redirect audio to it */
-    out->config.rate = MM_FULL_POWER_SAMPLING_RATE;
+    out->config.rate = MM_CODEC_SAMPLING_RATE;
     if(adev->devices & AUDIO_DEVICE_OUT_AUX_DIGITAL) {
+		LOGD("Using HDMI audio");
         port = PORT_SPDIF;
-        //out->config.rate = MM_LOW_POWER_SAMPLING_RATE;
+        out->config.rate = MM_SPDIF_SAMPLING_RATE;
     }
 	
     /* default to low power: will be corrected in out_write if necessary before first write to
      * tinyalsa. */
-    out->write_threshold = PLAYBACK_LONG_PERIOD_COUNT * LONG_PERIOD_SIZE;
-    out->config.start_threshold = SHORT_PERIOD_SIZE * 2;
-    out->config.avail_min = LONG_PERIOD_SIZE;
-	out->low_power = 1;
+    out->write_threshold = PLAYBACK_PERIOD_COUNT * PERIOD_SIZE;
+    out->config.start_threshold = PERIOD_SIZE * 2;
+    out->config.avail_min = PERIOD_SIZE;
 
-	LOGD("start_output_stream: card:%d, port:%d, rate:%d",card,port,out->config.rate);
+    bt_on = adev->devices & AUDIO_DEVICE_OUT_ALL_SCO;
+    if (bt_on) {
+	LOGD("Using BT SCO");
+	port = PORT_VOICE;
+    }
+
+    LOGD("start_output_stream: card:%d, port:%d, rate:%d",card,port,out->config.rate);
 	
     out->pcm = pcm_open(card, port, PCM_OUT | PCM_MMAP | PCM_NOIRQ, &out->config);
 
@@ -473,7 +467,7 @@ static size_t get_input_buffer_size(uint32_t sample_rate, int format, int channe
     return size * channel_count * sizeof(short);
 }
 
-static void add_echo_reference(struct smba1002_stream_out *out,
+static void add_echo_reference(struct tegra_stream_out *out,
                                struct echo_reference_itfe *reference)
 {
     pthread_mutex_lock(&out->lock);
@@ -481,7 +475,7 @@ static void add_echo_reference(struct smba1002_stream_out *out,
     pthread_mutex_unlock(&out->lock);
 }
 
-static void remove_echo_reference(struct smba1002_stream_out *out,
+static void remove_echo_reference(struct tegra_stream_out *out,
                                   struct echo_reference_itfe *reference)
 {
     pthread_mutex_lock(&out->lock);
@@ -493,7 +487,7 @@ static void remove_echo_reference(struct smba1002_stream_out *out,
     pthread_mutex_unlock(&out->lock);
 }
 
-static void put_echo_reference(struct smba1002_audio_device *adev,
+static void put_echo_reference(struct tegra_audio_device *adev,
                           struct echo_reference_itfe *reference)
 {
     if (adev->echo_reference != NULL &&
@@ -505,7 +499,7 @@ static void put_echo_reference(struct smba1002_audio_device *adev,
     }
 }
 
-static struct echo_reference_itfe *get_echo_reference(struct smba1002_audio_device *adev,
+static struct echo_reference_itfe *get_echo_reference(struct tegra_audio_device *adev,
                                                audio_format_t format,
                                                uint32_t channel_count,
                                                uint32_t sampling_rate)
@@ -529,7 +523,7 @@ static struct echo_reference_itfe *get_echo_reference(struct smba1002_audio_devi
     return adev->echo_reference;
 }
 
-static int get_playback_delay(struct smba1002_stream_out *out,
+static int get_playback_delay(struct tegra_stream_out *out,
                        size_t frames,
                        struct echo_reference_buffer *buffer)
 {
@@ -552,7 +546,7 @@ static int get_playback_delay(struct smba1002_stream_out *out,
      * Add the duration of current frame as we want the render time of the last
      * sample being written. */
     buffer->delay_ns = (long)(((int64_t)(kernel_frames + frames)* 1000000000)/
-                            MM_FULL_POWER_SAMPLING_RATE);
+                            MM_CODEC_SAMPLING_RATE);
 
     return 0;
 }
@@ -560,7 +554,7 @@ static int get_playback_delay(struct smba1002_stream_out *out,
 /* xface */
 static uint32_t out_get_sample_rate(const struct audio_stream *stream)
 {
-    return DEFAULT_OUT_SAMPLING_RATE;
+    return ANDROID_SAMPLING_RATE;
 }
 
 /* xface */
@@ -572,12 +566,12 @@ static int out_set_sample_rate(struct audio_stream *stream, uint32_t rate)
 /* xface */
 static size_t out_get_buffer_size(const struct audio_stream *stream)
 {
-    struct smba1002_stream_out *out = (struct smba1002_stream_out *)stream;
+    struct tegra_stream_out *out = (struct tegra_stream_out *)stream;
 
     /* take resampling into account and return the closest majoring
     multiple of 16 frames, as audioflinger expects audio buffers to
     be a multiple of 16 frames */
-    size_t size = (SHORT_PERIOD_SIZE * DEFAULT_OUT_SAMPLING_RATE) / out->config.rate;
+    size_t size = (PERIOD_SIZE * ANDROID_SAMPLING_RATE) / out->config.rate;
     size = ((size + 15) / 16) * 16;
     return size * audio_stream_frame_size((struct audio_stream *)stream);
 }
@@ -601,9 +595,9 @@ static int out_set_format(struct audio_stream *stream, int format)
 }
 
 /* must be called with hw device and output stream mutexes locked */
-static int do_output_standby(struct smba1002_stream_out *out)
+static int do_output_standby(struct tegra_stream_out *out)
 {
-    struct smba1002_audio_device *adev = out->dev;
+    struct tegra_audio_device *adev = out->dev;
 
     if (!out->standby) {
         pcm_close(out->pcm);
@@ -625,7 +619,7 @@ static int do_output_standby(struct smba1002_stream_out *out)
 /* xface */
 static int out_standby(struct audio_stream *stream)
 {
-    struct smba1002_stream_out *out = (struct smba1002_stream_out *)stream;
+    struct tegra_stream_out *out = (struct tegra_stream_out *)stream;
     int status;
 
     pthread_mutex_lock(&out->dev->lock);
@@ -645,15 +639,15 @@ static int out_dump(const struct audio_stream *stream, int fd)
 /* xface */
 static int out_set_parameters(struct audio_stream *stream, const char *kvpairs)
 {
-    struct smba1002_stream_out *out = (struct smba1002_stream_out *)stream;
-    struct smba1002_audio_device *adev = out->dev;
-    struct smba1002_stream_in *in;
+    struct tegra_stream_out *out = (struct tegra_stream_out *)stream;
+    struct tegra_audio_device *adev = out->dev;
+    struct tegra_stream_in *in;
     struct str_parms *parms;
     char *str;
     char value[32];
     int ret, val = 0;
 
-	LOGD("out_set_parameters: kvpairs:%s\n",kvpairs);
+	LOGD("out_set_parameters: kvpairs:%s\n", kvpairs);
 	
     parms = str_parms_create_str(kvpairs);
 
@@ -677,10 +671,11 @@ static int out_set_parameters(struct audio_stream *stream, const char *kvpairs)
 			mixer_ctl_set_value(adev->mixer_ctls.headset_switch, 0,
 				(val & AUDIO_DEVICE_OUT_WIRED_HEADPHONE) ? 1 : 0);
 				
-			LOGD("Headphone out:%c, Speaker out:%c, HDMI out:%c\n",
+			LOGD("Headphone out:%c, Speaker out:%c, HDMI out:%c, BT SCO: %c\n",
 				(val & AUDIO_DEVICE_OUT_WIRED_HEADPHONE) ? 'Y' : 'N',
 				(val & AUDIO_DEVICE_OUT_SPEAKER) ? 'Y' : 'N',
-				(val & AUDIO_DEVICE_OUT_AUX_DIGITAL) ? 'Y' : 'N'
+				(val & AUDIO_DEVICE_OUT_AUX_DIGITAL) ? 'Y' : 'N',
+				(val & AUDIO_DEVICE_OUT_ALL_SCO) ? 'Y' : 'N'
 				);
 				
             adev->devices &= ~AUDIO_DEVICE_OUT_ALL;
@@ -703,17 +698,17 @@ static char * out_get_parameters(const struct audio_stream *stream, const char *
 /* xface */
 static uint32_t out_get_latency(const struct audio_stream_out *stream)
 {
-    struct smba1002_stream_out *out = (struct smba1002_stream_out *)stream;
+    struct tegra_stream_out *out = (struct tegra_stream_out *)stream;
 
-    return (SHORT_PERIOD_SIZE * PLAYBACK_SHORT_PERIOD_COUNT * 1000) / out->config.rate;
+    return (PERIOD_SIZE * PLAYBACK_PERIOD_COUNT * 1000) / out->config.rate;
 }
 
 /* xface */
 static int out_set_volume(struct audio_stream_out *stream, float left,
                           float right)
 {
-    struct smba1002_stream_out *out = (struct smba1002_stream_out *)stream;
-    struct smba1002_audio_device *adev = out->dev;
+    struct tegra_stream_out *out = (struct tegra_stream_out *)stream;
+    struct tegra_audio_device *adev = out->dev;
 	
 	LOGD("out_set_volume: left:%f, right:%f\n",left,right);
 
@@ -735,13 +730,12 @@ static ssize_t out_write(struct audio_stream_out *stream, const void* buffer,
                          size_t bytes)
 {
     int ret;
-    struct smba1002_stream_out *out = (struct smba1002_stream_out *)stream;
-    struct smba1002_audio_device *adev = out->dev;
+    struct tegra_stream_out *out = (struct tegra_stream_out *)stream;
+    struct tegra_audio_device *adev = out->dev;
     size_t frame_size = audio_stream_frame_size(&out->stream.common);
     size_t in_frames = bytes / frame_size;
     size_t out_frames = RESAMPLER_BUFFER_SIZE / frame_size;
-    struct smba1002_stream_in *in;
-	bool low_power;
+    struct tegra_stream_in *in;
     int kernel_frames;
     void *buf;
 	
@@ -762,24 +756,10 @@ static ssize_t out_write(struct audio_stream_out *stream, const void* buffer,
         out->standby = 0;
     }
 	
-	/* Low power playback is allowed if system is in low power and we are not recording audio */
-	low_power = adev->low_power && !adev->active_input;
     pthread_mutex_unlock(&adev->lock);
 	
-	 if (low_power != out->low_power) {
-        if (low_power) {
-            out->write_threshold = LONG_PERIOD_SIZE * PLAYBACK_LONG_PERIOD_COUNT;
-            out->config.avail_min = LONG_PERIOD_SIZE;
-        } else {
-            out->write_threshold = SHORT_PERIOD_SIZE * PLAYBACK_SHORT_PERIOD_COUNT;
-            out->config.avail_min = SHORT_PERIOD_SIZE;
-        }
-        pcm_set_avail_min(out->pcm, out->config.avail_min);
-        out->low_power = low_power;
-    }
- 
     /* only use resampler if required */
-    if (out->config.rate != DEFAULT_OUT_SAMPLING_RATE) {
+    if (out->config.rate != ANDROID_SAMPLING_RATE) {
         out->resampler->resample_from_input(out->resampler,
                                             (int16_t *)buffer,
                                             &in_frames,
@@ -810,7 +790,7 @@ static ssize_t out_write(struct audio_stream_out *stream, const void* buffer,
         if (kernel_frames > out->write_threshold) {
             unsigned long time = (unsigned long)
                     (((int64_t)(kernel_frames - out->write_threshold) * 1000000) /
-                            MM_FULL_POWER_SAMPLING_RATE);
+                            MM_CODEC_SAMPLING_RATE);
             if (time < MIN_WRITE_SLEEP_US)
                 time = MIN_WRITE_SLEEP_US;
             usleep(time);
@@ -853,10 +833,10 @@ static int out_remove_audio_effect(const struct audio_stream *stream, effect_han
 /** audio_stream_in implementation **/
 
 /* must be called with hw device and input stream mutexes locked */
-static int start_input_stream(struct smba1002_stream_in *in)
+static int start_input_stream(struct tegra_stream_in *in)
 {
     int ret = 0;
-    struct smba1002_audio_device *adev = in->dev;
+    struct tegra_audio_device *adev = in->dev;
 
     adev->active_input = in;
 
@@ -872,7 +852,7 @@ static int start_input_stream(struct smba1002_stream_in *in)
                                         in->requested_rate);
 
     /* this assumes routing is done previously */
-    in->pcm = pcm_open(0, PORT_MM, PCM_IN, &in->config);
+    in->pcm = pcm_open(CARD_SND, PORT_MM, PCM_IN, &in->config);
     if (!pcm_is_ready(in->pcm)) {
         LOGE("cannot open pcm_in driver: %s", pcm_get_error(in->pcm));
         pcm_close(in->pcm);
@@ -891,7 +871,7 @@ static int start_input_stream(struct smba1002_stream_in *in)
 /* xface */
 static uint32_t in_get_sample_rate(const struct audio_stream *stream)
 {
-    struct smba1002_stream_in *in = (struct smba1002_stream_in *)stream;
+    struct tegra_stream_in *in = (struct tegra_stream_in *)stream;
 
     return in->requested_rate;
 }
@@ -905,7 +885,7 @@ static int in_set_sample_rate(struct audio_stream *stream, uint32_t rate)
 /* xface */
 static size_t in_get_buffer_size(const struct audio_stream *stream)
 {
-    struct smba1002_stream_in *in = (struct smba1002_stream_in *)stream;
+    struct tegra_stream_in *in = (struct tegra_stream_in *)stream;
 
     return get_input_buffer_size(in->requested_rate,
                                  AUDIO_FORMAT_PCM_16_BIT,
@@ -915,7 +895,7 @@ static size_t in_get_buffer_size(const struct audio_stream *stream)
 /* xface */
 static uint32_t in_get_channels(const struct audio_stream *stream)
 {
-    struct smba1002_stream_in *in = (struct smba1002_stream_in *)stream;
+    struct tegra_stream_in *in = (struct tegra_stream_in *)stream;
 
     if (in->config.channels == 1) {
         return AUDIO_CHANNEL_IN_MONO;
@@ -937,9 +917,9 @@ static int in_set_format(struct audio_stream *stream, int format)
 }
 
 /* must be called with hw device and input stream mutexes locked */
-static int do_input_standby(struct smba1002_stream_in *in)
+static int do_input_standby(struct tegra_stream_in *in)
 {
-    struct smba1002_audio_device *adev = in->dev;
+    struct tegra_audio_device *adev = in->dev;
 
     if (!in->standby) {
         pcm_close(in->pcm);
@@ -965,7 +945,7 @@ static int do_input_standby(struct smba1002_stream_in *in)
 /* xface */
 static int in_standby(struct audio_stream *stream)
 {
-    struct smba1002_stream_in *in = (struct smba1002_stream_in *)stream;
+    struct tegra_stream_in *in = (struct tegra_stream_in *)stream;
     int status;
 
     pthread_mutex_lock(&in->dev->lock);
@@ -985,8 +965,8 @@ static int in_dump(const struct audio_stream *stream, int fd)
 /* xface */
 static int in_set_parameters(struct audio_stream *stream, const char *kvpairs)
 {
-    struct smba1002_stream_in *in = (struct smba1002_stream_in *)stream;
-    struct smba1002_audio_device *adev = in->dev;
+    struct tegra_stream_in *in = (struct tegra_stream_in *)stream;
+    struct tegra_audio_device *adev = in->dev;
     struct str_parms *parms;
     char *str;
     char value[32];
@@ -1036,22 +1016,19 @@ static char * in_get_parameters(const struct audio_stream *stream,
 /* xface */
 static int in_set_gain(struct audio_stream_in *stream, float gain)
 {
-    struct smba1002_stream_in *in = (struct smba1002_stream_in *)stream;
-    struct smba1002_audio_device *adev = in->dev;
+    struct tegra_stream_in *in = (struct tegra_stream_in *)stream;
+    struct tegra_audio_device *adev = in->dev;
 
 	unsigned int channel;
 	
     for (channel = 0; channel < 2; channel++) {
-        mixer_ctl_set_value(adev->mixer_ctls.mic_volume, channel,
-            PERC_TO_CAPTURE_VOLUME(gain));
-        mixer_ctl_set_value(adev->mixer_ctls.mic_volume, channel,
-            PERC_TO_CAPTURE_VOLUME(gain));
+        mixer_ctl_set_value(adev->mixer_ctls.mic_volume, channel, PERC_TO_CAPTURE_VOLUME(gain));
     }
 
     return 0;
 }
 
-static void get_capture_delay(struct smba1002_stream_in *in,
+static void get_capture_delay(struct tegra_stream_in *in,
                        size_t frames,
                        struct echo_reference_buffer *buffer)
 {
@@ -1098,7 +1075,7 @@ static void get_capture_delay(struct smba1002_stream_in *in,
 
 }
 
-static int32_t update_echo_reference(struct smba1002_stream_in *in, size_t frames)
+static int32_t update_echo_reference(struct tegra_stream_in *in, size_t frames)
 {
     struct echo_reference_buffer b;
     b.delay_ns = 0;
@@ -1164,7 +1141,7 @@ static int set_preprocessor_echo_delay(effect_handle_t handle,
     return set_preprocessor_param(handle, param);
 }
 
-static void push_echo_reference(struct smba1002_stream_in *in, size_t frames)
+static void push_echo_reference(struct tegra_stream_in *in, size_t frames)
 {
     /* read frames from echo reference buffer and update echo delay
      * in->ref_frames_in is updated with frames available in in->ref_buf */
@@ -1199,13 +1176,13 @@ static void push_echo_reference(struct smba1002_stream_in *in, size_t frames)
 static int get_next_buffer(struct resampler_buffer_provider *buffer_provider,
                                    struct resampler_buffer* buffer)
 {
-    struct smba1002_stream_in *in;
+    struct tegra_stream_in *in;
 
     if (buffer_provider == NULL || buffer == NULL)
         return -EINVAL;
 
-    in = (struct smba1002_stream_in *)((char *)buffer_provider -
-                                   offsetof(struct smba1002_stream_in, buf_provider));
+    in = (struct tegra_stream_in *)((char *)buffer_provider -
+                                   offsetof(struct tegra_stream_in, buf_provider));
 
     if (in->pcm == NULL) {
         buffer->raw = NULL;
@@ -1240,20 +1217,20 @@ static int get_next_buffer(struct resampler_buffer_provider *buffer_provider,
 static void release_buffer(struct resampler_buffer_provider *buffer_provider,
                                   struct resampler_buffer* buffer)
 {
-    struct smba1002_stream_in *in;
+    struct tegra_stream_in *in;
 
     if (buffer_provider == NULL || buffer == NULL)
         return;
 
-    in = (struct smba1002_stream_in *)((char *)buffer_provider -
-                                   offsetof(struct smba1002_stream_in, buf_provider));
+    in = (struct tegra_stream_in *)((char *)buffer_provider -
+                                   offsetof(struct tegra_stream_in, buf_provider));
 
     in->frames_in -= buffer->frame_count;
 }
 
 /* read_frames() reads frames from kernel driver, down samples to capture rate
  * if necessary and output the number of frames requested to the buffer specified */
-static ssize_t read_frames(struct smba1002_stream_in *in, void *buffer, ssize_t frames)
+static ssize_t read_frames(struct tegra_stream_in *in, void *buffer, ssize_t frames)
 {
     ssize_t frames_wr = 0;
 
@@ -1292,7 +1269,7 @@ static ssize_t read_frames(struct smba1002_stream_in *in, void *buffer, ssize_t 
 /* process_frames() reads frames from kernel driver (via read_frames()),
  * calls the active audio pre processings and output the number of frames requested
  * to the buffer specified */
-static ssize_t process_frames(struct smba1002_stream_in *in, void* buffer, ssize_t frames)
+static ssize_t process_frames(struct tegra_stream_in *in, void* buffer, ssize_t frames)
 {
     ssize_t frames_wr = 0;
     audio_buffer_t in_buf;
@@ -1362,8 +1339,8 @@ static ssize_t in_read(struct audio_stream_in *stream, void* buffer,
                        size_t bytes)
 {
     int ret = 0;
-    struct smba1002_stream_in *in = (struct smba1002_stream_in *)stream;
-    struct smba1002_audio_device *adev = in->dev;
+    struct tegra_stream_in *in = (struct tegra_stream_in *)stream;
+    struct tegra_audio_device *adev = in->dev;
     size_t frames_rq = bytes / audio_stream_frame_size(&stream->common);
 
     /* acquiring hw device mutex systematically is useful if a low priority thread is waiting
@@ -1414,7 +1391,7 @@ static uint32_t in_get_input_frames_lost(struct audio_stream_in *stream)
 static int in_add_audio_effect(const struct audio_stream *stream,
                                effect_handle_t effect)
 {
-    struct smba1002_stream_in *in = (struct smba1002_stream_in *)stream;
+    struct tegra_stream_in *in = (struct tegra_stream_in *)stream;
     int status;
     effect_descriptor_t desc;
 
@@ -1447,7 +1424,7 @@ exit:
 static int in_remove_audio_effect(const struct audio_stream *stream,
                                   effect_handle_t effect)
 {
-    struct smba1002_stream_in *in = (struct smba1002_stream_in *)stream;
+    struct tegra_stream_in *in = (struct tegra_stream_in *)stream;
     int i;
     int status = -EINVAL;
     bool found = false;
@@ -1498,18 +1475,18 @@ static int adev_open_output_stream(struct audio_hw_device *dev,
                                    uint32_t *channels, uint32_t *sample_rate,
                                    struct audio_stream_out **stream_out)
 {
-    struct smba1002_audio_device *ladev = (struct smba1002_audio_device *)dev;
-    struct smba1002_stream_out *out;
+    struct tegra_audio_device *ladev = (struct tegra_audio_device *)dev;
+    struct tegra_stream_out *out;
     int ret;
 
 	LOGD("adev_open_output_stream");
 	
-    out = (struct smba1002_stream_out *)calloc(1, sizeof(struct smba1002_stream_out));
+    out = (struct tegra_stream_out *)calloc(1, sizeof(struct tegra_stream_out));
     if (!out)
         return -ENOMEM;
 
-    ret = create_resampler(DEFAULT_OUT_SAMPLING_RATE,
-                           MM_FULL_POWER_SAMPLING_RATE,
+    ret = create_resampler(ANDROID_SAMPLING_RATE,
+                           MM_CODEC_SAMPLING_RATE,
                            2,
                            RESAMPLER_QUALITY_DEFAULT,
                            NULL,
@@ -1564,7 +1541,7 @@ err_open:
 static void adev_close_output_stream(struct audio_hw_device *dev,
                                      struct audio_stream_out *stream)
 {
-    struct smba1002_stream_out *out = (struct smba1002_stream_out *)stream;
+    struct tegra_stream_out *out = (struct tegra_stream_out *)stream;
 
 	LOGD("adev_close_output_stream");
 	
@@ -1579,7 +1556,7 @@ static void adev_close_output_stream(struct audio_hw_device *dev,
 /* xface */
 static int adev_set_parameters(struct audio_hw_device *dev, const char *kvpairs)
 {
-    struct smba1002_audio_device *adev = (struct smba1002_audio_device *)dev;
+    struct tegra_audio_device *adev = (struct tegra_audio_device *)dev;
     struct str_parms *parms;
     int ret = 0;
 	char *str;
@@ -1588,16 +1565,6 @@ static int adev_set_parameters(struct audio_hw_device *dev, const char *kvpairs)
 	LOGD("adev_set_parameters: kppairs: %s", kvpairs);
 
     parms = str_parms_create_str(kvpairs);
-	
-	/* Get the screen state as system power indicator */
-	ret = str_parms_get_str(parms, "screen_state", value, sizeof(value));
-    if (ret >= 0) {
-        if (strcmp(value, AUDIO_PARAMETER_VALUE_ON) == 0)
-            adev->low_power = false;
-        else
-            adev->low_power = true;
-    }
-	
     str_parms_destroy(parms);
 	
     return ret;
@@ -1619,7 +1586,7 @@ static int adev_init_check(const struct audio_hw_device *dev)
 /* xface */
 static int adev_set_voice_volume(struct audio_hw_device *dev, float volume)
 {
-    struct smba1002_audio_device *adev = (struct smba1002_audio_device *)dev;
+    struct tegra_audio_device *adev = (struct tegra_audio_device *)dev;
 	
 	LOGD("adev_set_voice_volume: volume: %f", volume);
 	
@@ -1629,7 +1596,7 @@ static int adev_set_voice_volume(struct audio_hw_device *dev, float volume)
 /* xface */
 static int adev_set_master_volume(struct audio_hw_device *dev, float volume)
 {
-	struct smba1002_audio_device *adev = (struct smba1002_audio_device *)dev;
+	struct tegra_audio_device *adev = (struct tegra_audio_device *)dev;
 
 	LOGD("adev_set_master_volume: volume: %f", volume);
 	
@@ -1644,7 +1611,7 @@ static int adev_set_master_volume(struct audio_hw_device *dev, float volume)
 /* xface */
 static int adev_set_mode(struct audio_hw_device *dev, int mode)
 {
-    struct smba1002_audio_device *adev = (struct smba1002_audio_device *)dev;
+    struct tegra_audio_device *adev = (struct tegra_audio_device *)dev;
 
 	LOGD("adev_set_mode: mode: %d", mode);
 	
@@ -1661,14 +1628,14 @@ static int adev_set_mode(struct audio_hw_device *dev, int mode)
 /* xface */
 static int adev_set_mic_mute(struct audio_hw_device *dev, bool state)
 {
-    struct smba1002_audio_device *adev = (struct smba1002_audio_device *)dev;
+    struct tegra_audio_device *adev = (struct tegra_audio_device *)dev;
 
 	LOGD("adev_set_mic_mute: state: %d", state);
 	
     adev->mic_mute = state;
 
 	/* Disable mic if requested */
-	mixer_ctl_set_value(adev->mixer_ctls.mic_switch, 0,	state ? 0 : 1);
+	mixer_ctl_set_value(adev->mixer_ctls.mic_switch, 0, state ? 0 : 1);
 	
     return 0;
 }
@@ -1676,7 +1643,7 @@ static int adev_set_mic_mute(struct audio_hw_device *dev, bool state)
 /* xface */
 static int adev_get_mic_mute(const struct audio_hw_device *dev, bool *state)
 {
-    struct smba1002_audio_device *adev = (struct smba1002_audio_device *)dev;
+    struct tegra_audio_device *adev = (struct tegra_audio_device *)dev;
 
     *state = adev->mic_mute;
 
@@ -1704,17 +1671,18 @@ static int adev_open_input_stream(struct audio_hw_device *dev, uint32_t devices,
                                   audio_in_acoustics_t acoustics,
                                   struct audio_stream_in **stream_in)
 {
-    struct smba1002_audio_device *ladev = (struct smba1002_audio_device *)dev;
-    struct smba1002_stream_in *in;
+    struct tegra_audio_device *ladev = (struct tegra_audio_device *)dev;
+    struct tegra_stream_in *in;
     int ret;
-    int channel_count = popcount(*channel_mask);
+    //int channel_count = popcount(*channel_mask);
+    int channel_count = 2;
 
 	LOGD("adev_open_input_stream: channel_count:%d", channel_count);
 	
     if (check_input_parameters(*sample_rate, *format, channel_count) != 0)
         return -EINVAL;
 
-    in = (struct smba1002_stream_in *)calloc(1, sizeof(struct smba1002_stream_in));
+    in = (struct tegra_stream_in *)calloc(1, sizeof(struct tegra_stream_in));
     if (!in)
         return -ENOMEM;
 
@@ -1782,7 +1750,7 @@ err:
 static void adev_close_input_stream(struct audio_hw_device *dev,
                                    struct audio_stream_in *stream)
 {
-    struct smba1002_stream_in *in = (struct smba1002_stream_in *)stream;
+    struct tegra_stream_in *in = (struct tegra_stream_in *)stream;
 
 	LOGD("adev_close_input_stream");
 	
@@ -1806,7 +1774,7 @@ static int adev_dump(const audio_hw_device_t *device, int fd)
 /* xface */
 static int adev_close(hw_device_t *device)
 {
-    struct smba1002_audio_device *adev = (struct smba1002_audio_device *)device;
+    struct tegra_audio_device *adev = (struct tegra_audio_device *)device;
 	
 	LOGD("adev_close");
 
@@ -1819,20 +1787,24 @@ static int adev_close(hw_device_t *device)
 static uint32_t adev_get_supported_devices(const struct audio_hw_device *dev)
 {
 	LOGD("adev_get_supported_devices");
-    return (/* OUT */
-            AUDIO_DEVICE_OUT_SPEAKER |
-            AUDIO_DEVICE_OUT_WIRED_HEADPHONE |
-            AUDIO_DEVICE_OUT_AUX_DIGITAL |
-            AUDIO_DEVICE_OUT_DEFAULT |
-            /* IN */
-            AUDIO_DEVICE_IN_BUILTIN_MIC |
-            AUDIO_DEVICE_IN_DEFAULT);
+	return (
+		/* OUT */
+		AUDIO_DEVICE_OUT_SPEAKER |
+		AUDIO_DEVICE_OUT_WIRED_HEADPHONE |
+		AUDIO_DEVICE_OUT_AUX_DIGITAL |
+		AUDIO_DEVICE_OUT_ALL_SCO |
+		AUDIO_DEVICE_OUT_DEFAULT |
+		/* IN */
+		AUDIO_DEVICE_IN_BUILTIN_MIC |
+		AUDIO_DEVICE_IN_ALL_SCO |
+		AUDIO_DEVICE_IN_DEFAULT
+	);
 }
 
 static int adev_open(const hw_module_t* module, const char* name,
                      hw_device_t** device)
 {
-    struct smba1002_audio_device *adev;
+    struct tegra_audio_device *adev;
     int ret;
 
 	LOGE("adev_open: name:'%s'",name);
@@ -1840,7 +1812,7 @@ static int adev_open(const hw_module_t* module, const char* name,
     if (strcmp(name, AUDIO_HARDWARE_INTERFACE) != 0)
         return -EINVAL;
 
-    adev = calloc(1, sizeof(struct smba1002_audio_device));
+    adev = calloc(1, sizeof(struct tegra_audio_device));
     if (!adev)
         return -ENOMEM;
 
@@ -1865,81 +1837,72 @@ static int adev_open(const hw_module_t* module, const char* name,
     adev->hw_device.close_input_stream = adev_close_input_stream;
     adev->hw_device.dump = adev_dump;
 
-    adev->mixer = mixer_open(0);
-    if (!adev->mixer) {
-        free(adev);
-        LOGE("Unable to open the mixer, aborting.");
-        return -EINVAL;
-    }
-
-    adev->mixer_ctls.mic_volume = mixer_get_ctl_by_name(adev->mixer,
-                                           MIXER_MIC_CAPTURE_VOLUME);
-	if (!adev->mixer_ctls.mic_volume) { 
-		LOGE("Unable to find '%s' mixer control",MIXER_MIC_CAPTURE_VOLUME);
-		goto error_out;
+	adev->mixer = mixer_open(0);
+	if (!adev->mixer) {
+		free(adev);
+		LOGE("Unable to open the mixer, aborting.");
+		return -EINVAL;
 	}
-	
-    adev->mixer_ctls.pcm_volume = mixer_get_ctl_by_name(adev->mixer,
-                                           MIXER_PCM_PLAYBACK_VOLUME);
-	if (!adev->mixer_ctls.pcm_volume) { 
-		LOGE("Unable to find '%s' mixer control",MIXER_PCM_PLAYBACK_VOLUME);
+
+	adev->mixer_ctls.pcm_volume = mixer_get_ctl_by_name(adev->mixer, MIXER_PCM_PLAYBACK_VOLUME);
+	if (!adev->mixer_ctls.pcm_volume) {
+		LOGE("Unable to find '%s' mixer control", MIXER_PCM_PLAYBACK_VOLUME);
 		goto error_out;
 	}
 
-    adev->mixer_ctls.pcm_cap_volume = mixer_get_ctl_by_name(adev->mixer, MIXER_PCM_CAPTURE_VOLUME);
-
+	adev->mixer_ctls.pcm_cap_volume = mixer_get_ctl_by_name(adev->mixer, MIXER_PCM_CAPTURE_VOLUME);
 	if (!adev->mixer_ctls.pcm_cap_volume) {
 		LOGE("Unable to find '%s' mixer control", MIXER_PCM_CAPTURE_VOLUME);
 		goto error_out;
 	}
-										   
-    adev->mixer_ctls.headset_volume = mixer_get_ctl_by_name(adev->mixer,
-                                           MIXER_HEADSET_PLAYBACK_VOLUME);
+
+	adev->mixer_ctls.speaker_volume = mixer_get_ctl_by_name(adev->mixer, MIXER_SPEAKER_PLAYBACK_VOLUME);
+	if (!adev->mixer_ctls.speaker_volume) {
+		LOGE("Unable to find '%s' mixer control", MIXER_SPEAKER_PLAYBACK_VOLUME);
+		goto error_out;
+	}
+
+	adev->mixer_ctls.speaker_switch = mixer_get_ctl_by_name(adev->mixer, MIXER_SPEAKER_PLAYBACK_SWITCH);
+	if (!adev->mixer_ctls.speaker_switch) {
+		LOGE("Unable to find '%s' mixer control", MIXER_SPEAKER_PLAYBACK_SWITCH);
+		goto error_out;
+	}
+
+	adev->mixer_ctls.headset_volume = mixer_get_ctl_by_name(adev->mixer, MIXER_HEADSET_PLAYBACK_VOLUME);
 	if (!adev->mixer_ctls.headset_volume) { 
-		LOGE("Unable to find '%s' mixer control",MIXER_HEADSET_PLAYBACK_VOLUME);
-		goto error_out;
-	}
-										   
-    adev->mixer_ctls.speaker_volume = mixer_get_ctl_by_name(adev->mixer,
-                                           MIXER_SPEAKER_PLAYBACK_VOLUME);
-	if (!adev->mixer_ctls.speaker_volume) { 
-		LOGE("Unable to find '%s' mixer control",MIXER_SPEAKER_PLAYBACK_VOLUME);
+		LOGE("Unable to find '%s' mixer control", MIXER_HEADSET_PLAYBACK_VOLUME);
 		goto error_out;
 	}
 
-    adev->mixer_ctls.mic_switch = mixer_get_ctl_by_name(adev->mixer,
-                                           MIXER_MIC_CAPTURE_SWITCH);
-	if (!adev->mixer_ctls.mic_switch) { 
-		LOGE("Unable to find '%s' mixer control",MIXER_MIC_CAPTURE_SWITCH);
-		goto error_out;
-	}
-	
-    adev->mixer_ctls.headset_switch = mixer_get_ctl_by_name(adev->mixer,
-                                           MIXER_HEADSET_PLAYBACK_SWITCH);
-	if (!adev->mixer_ctls.headset_switch) { 
-		LOGE("Unable to find '%s' mixer control",MIXER_HEADSET_PLAYBACK_SWITCH);
-		goto error_out;
-	}
-										   
-    adev->mixer_ctls.speaker_switch = mixer_get_ctl_by_name(adev->mixer,
-                                           MIXER_SPEAKER_PLAYBACK_SWITCH);
-	if (!adev->mixer_ctls.speaker_switch) { 
-		LOGE("Unable to find '%s' mixer control",MIXER_SPEAKER_PLAYBACK_SWITCH);
+	adev->mixer_ctls.headset_switch = mixer_get_ctl_by_name(adev->mixer, MIXER_HEADSET_PLAYBACK_SWITCH);
+	if (!adev->mixer_ctls.headset_switch) {
+		LOGE("Unable to find '%s' mixer control", MIXER_HEADSET_PLAYBACK_SWITCH);
 		goto error_out;
 	}
 
+	adev->mixer_ctls.mic_volume = mixer_get_ctl_by_name(adev->mixer, MIXER_MIC_CAPTURE_VOLUME);
+		if (!adev->mixer_ctls.mic_volume) {
+		LOGE("Unable to find '%s' mixer control", MIXER_MIC_CAPTURE_VOLUME);
+		goto error_out;
+	}
 
-    /* Set the default route before the PCM stream is opened */
-    pthread_mutex_lock(&adev->lock);
-    set_route_by_array(adev->mixer, defaults, 1);
-    adev->mode = AUDIO_MODE_NORMAL;
-    adev->devices = AUDIO_DEVICE_OUT_SPEAKER | AUDIO_DEVICE_IN_BUILTIN_MIC;
+	adev->mixer_ctls.mic_switch = mixer_get_ctl_by_name(adev->mixer, MIXER_MIC_CAPTURE_SWITCH);
+		if (!adev->mixer_ctls.mic_switch) {
+		LOGE("Unable to find '%s' mixer control", MIXER_MIC_CAPTURE_SWITCH);
+		goto error_out;
+	}
 
-    pthread_mutex_unlock(&adev->lock);
+	/* Set the default route before the PCM stream is opened */
+	pthread_mutex_lock(&adev->lock);
+	set_route_by_array(adev->mixer, defaults, 1);
+	adev->mode = AUDIO_MODE_NORMAL;
+	adev->devices = AUDIO_DEVICE_OUT_SPEAKER | AUDIO_DEVICE_IN_BUILTIN_MIC;
 
-    *device = &adev->hw_device.common;
+	pthread_mutex_unlock(&adev->lock);
 
-    return 0;
+	*device = &adev->hw_device.common;
+
+	return 0;
 
 error_out:	
 
@@ -1978,7 +1941,7 @@ struct audio_module HAL_MODULE_INFO_SYM = {
         .version_major = 1,
         .version_minor = 0,
         .id = AUDIO_HARDWARE_MODULE_ID,
-        .name = "smba1002 audio HW HAL",
+        .name = "Tegra audio HW HAL",
         .author = "The Android Open Source Project",
         .methods = &hal_module_methods,
     },
