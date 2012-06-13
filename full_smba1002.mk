@@ -17,16 +17,41 @@ PRODUCT_PACKAGES := \
     SpareParts \
     Development
 
-$(call inherit-product, $(SRC_TARGET_DIR)/product/full_base.mk)
+# Live Wallpapers
+PRODUCT_PACKAGES += \
+    HoloSpiralWallpaper \
+    LiveWallpapersPicker \
+    VisualizationWallpapers \
 
-# Inherit from smba1002 device
-$(call inherit-product, device/malata/smba1002/device.mk)
+# Camera
+##PRODUCT_PACKAGES += \
+##    Camera
+
+# GPS
+##PRODUCT_PACKAGES += \
+##    gps.tegra
+
+
+$(call inherit-product, $(SRC_TARGET_DIR)/product/full_base.mk)
 
 # The gps config appropriate for this device
 $(call inherit-product, device/common/gps/gps_us_supl.mk)
 
+# Inherit from smba-common
+$(call inherit-product, device/malata/smba-common/device-common.mk)
+
+# Inherit from vendor specific if exists
 $(call inherit-product-if-exists, vendor/malata/smba1002/device-vendor.mk)
 
+# Inherit from device specific if exists
+$(call inherit-product-if-exists, device/malata/smba1002/device-smba1002.mk)
+
+# These is the hardware-specific overlay, which points to the location
+# of hardware-specific resource overrides, typically the frameworks and
+# application settings that are stored in resourced.
+DEVICE_PACKAGE_OVERLAYS += device/malata/smba1002/overlay
+
+# Discard inherited values and use our own instead.
 PRODUCT_NAME := full_smba1002
 PRODUCT_DEVICE := smba1002
 PRODUCT_BRAND := Malata
