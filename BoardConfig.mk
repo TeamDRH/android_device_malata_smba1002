@@ -15,7 +15,7 @@
 #
 
 # inherit from the common version first
--include device/malata/smba-common/BoardConfigCommon.mk
+-include device/malata/smba_common/BoardConfigCommon.mk
 
 TARGET_PREBUILT_KERNEL := device/malata/smba1002/prebuilt/kernel
 

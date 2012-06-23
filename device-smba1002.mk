@@ -39,7 +39,7 @@ PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
 
 # Bluetooth
 PRODUCT_COPY_FILES += \
-    device/malata/smba-common/prebuilt/bcm4329.hcd:system/etc/firmware/bcm4329.hcd
+    device/malata/smba_common/prebuilt/bcm4329.hcd:system/etc/firmware/bcm4329.hcd
 
 PRODUCT_PROPERTY_OVERRIDES += \
     ro.sf.lcd_density=120
@@ -71,5 +71,5 @@ endif
 
 # Make it optional to include vendor stuff..Just to be nice ;)
 ifneq ($(TARGET_IGNORE_VENDOR),yes)
-$(call inherit-product, vendor/malata/smba1002/device-vendor.mk)
+$(call inherit-product, vendor/malata/smba1002/smba1002-vendor.mk)
 endif

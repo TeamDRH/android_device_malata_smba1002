@@ -37,11 +37,11 @@ $(call inherit-product, $(SRC_TARGET_DIR)/product/full_base.mk)
 # The gps config appropriate for this device
 $(call inherit-product, device/common/gps/gps_us_supl.mk)
 
-# Inherit from smba-common
-$(call inherit-product, device/malata/smba-common/device-common.mk)
+# Inherit from smba_common
+$(call inherit-product, device/malata/smba_common/device-common.mk)
 
 # Inherit from vendor specific if exists
-$(call inherit-product-if-exists, vendor/malata/smba1002/device-vendor.mk)
+$(call inherit-product-if-exists, vendor/malata/smba1002/smba1002-vendor.mk)
 
 # Inherit from device specific if exists
 $(call inherit-product-if-exists, device/malata/smba1002/device-smba1002.mk)
