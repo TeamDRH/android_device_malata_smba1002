@@ -161,8 +161,6 @@ kernel/drivers/tty/serial/serial_core.ko
 kernel/drivers/usb/class/cdc-acm.ko
 kernel/drivers/usb/class/cdc-wdm.ko
 kernel/drivers/usb/core/usbcore.ko
-kernel/drivers/usb/gadget/udc-core.ko
-kernel/drivers/usb/gadget/fsl_usb2_udc.ko
 kernel/drivers/usb/host/ehci-hcd.ko
 kernel/drivers/usb/serial/usbserial.ko
 kernel/drivers/usb/serial/ftdi_sio.ko
@@ -171,6 +169,7 @@ kernel/drivers/usb/serial/pl2303.ko
 kernel/drivers/usb/serial/usb_wwan.ko
 kernel/drivers/usb/storage/usb-storage.ko
 kernel/drivers/usb/storage/usb-libusual.ko
+kernel/drivers/usb/gadget/fsl_usb2_udc.ko
 kernel/drivers/video/fb.ko
 kernel/drivers/video/cfbfillrect.ko
 kernel/drivers/video/cfbcopyarea.ko

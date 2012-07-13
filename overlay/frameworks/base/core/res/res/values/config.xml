@@ -126,10 +126,11 @@
         <item>1</item>
         <item>7</item>
     </integer-array>
-
+<!-- not in AOSP JB
     <string name="config_networkLocationProvider">com.google.android.location.NetworkLocationProvider</string>
 
    <string name="config_geocodeProvider">com.google.android.location.GeocodeProvider</string>
+-->
     <!-- XXXXX NOTE THE FOLLOWING RESOURCES USE THE WRONG NAMING CONVENTION.
          Please don't copy them, copy anything else. -->
 
@@ -160,7 +161,7 @@
         <item>"7,1"</item>
         <item>"9,1"</item>
     </string-array>
-
+<!-- not in AOSP JB
     <string-array name="shutdown_reboot_options" translatable="false">
         <item>@string/reboot_reboot</item>
     </string-array>
@@ -168,4 +169,5 @@
     <string-array name="shutdown_reboot_actions" translatable="false">
         <item></item>
     </string-array>
+-->
 </resources>
