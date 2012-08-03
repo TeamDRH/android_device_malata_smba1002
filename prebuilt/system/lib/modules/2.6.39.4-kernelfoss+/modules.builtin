@@ -44,6 +44,7 @@ kernel/crypto/krng.ko
 kernel/block/deadline-iosched.ko
 kernel/block/cfq-iosched.ko
 kernel/drivers/base/firmware_class.ko
+kernel/drivers/block/loop.ko
 kernel/drivers/bluetooth/hci_uart.ko
 kernel/drivers/bluetooth/bluesleep.ko
 kernel/drivers/cdrom/cdrom.ko
