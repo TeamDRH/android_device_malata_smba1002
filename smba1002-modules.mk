@@ -13,7 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-MOD_SRC := device/malata/smba1002/prebuilt/system/lib/modules
+#MOD_SRC := device/malata/smba1002/prebuilt/system/lib/modules
+MOD_SRC := kernel/malata/smba1002
 
 PRODUCT_COPY_FILES += $(shell \
     find $(MOD_SRC) -name '*.ko' \
