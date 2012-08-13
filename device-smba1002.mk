@@ -41,6 +41,9 @@ PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
 PRODUCT_COPY_FILES += \
     device/malata/smba_common/prebuilt/bcm4329.hcd:system/etc/firmware/bcm4329.hcd
 
+PRODUCT_COPY_FILES += \
+    device/malata/smba1002/prebuilt/init.rc:root/init.rc 
+
 PRODUCT_PROPERTY_OVERRIDES += \
     ro.sf.lcd_density=120
 
