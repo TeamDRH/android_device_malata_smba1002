@@ -162,6 +162,12 @@ on post-fs
         chown system cache /cache
         chmod 0551 /cache
 
+# camera perms
+   chown system camera /dev/video0
+   chmod 0660 /dev/video0
+   chown system camera /dev/video1
+   chmod 0660 /dev/video1
+
 
 on post-fs-data
     # We chown/chmod /data again so because mount is run as root + defaults
