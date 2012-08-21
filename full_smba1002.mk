@@ -24,8 +24,8 @@ PRODUCT_PACKAGES += \
     VisualizationWallpapers \
 
 # Camera
-##PRODUCT_PACKAGES += \
-##    Camera
+PRODUCT_PACKAGES += \
+    Camera
 
 # GPS
 ##PRODUCT_PACKAGES += \
